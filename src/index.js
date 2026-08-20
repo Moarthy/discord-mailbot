@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Events } = require('discord.js');
 
 const config = require('./config');
 const logger = require('./utils/logger');
@@ -25,7 +25,7 @@ const client = new Client({
 
 client.config = config;
 
-client.on('clientReady', () => ready.execute(client));
+client.once(Events.ClientReady, () => ready.execute(client));
 client.on('messageCreate', (message) => messageCreate.execute(client, message));
 client.on('channelDelete', (channel) => channelDelete.execute(client, channel));
 client.on('interactionCreate', (interaction) => interactionCreate.execute(client, interaction));

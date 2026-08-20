@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Client, REST, Routes } = require('discord.js');
+const { Client, REST, Routes, Events } = require('discord.js');
 
 const config = require('./config');
 const commands = require('./commands');
@@ -10,7 +10,7 @@ const body = Object.values(commands).map((command) => command.data.toJSON());
 
 const client = new Client({ intents: [] });
 
-client.once('clientReady', async () => {
+client.once(Events.ClientReady, async () => {
   try {
     const rest = new REST({ version: '10' }).setToken(config.token);
     const appId = client.application.id;

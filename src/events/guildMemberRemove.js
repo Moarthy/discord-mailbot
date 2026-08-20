@@ -10,7 +10,6 @@ module.exports = {
   async execute(client, member) {
     try {
       const leaverName = member.displayName || member.user?.username || 'A staff member';
-      const leaverAvatar = member.user?.displayAvatarURL({ size: 256 }) ?? null;
 
       for (const ticket of store.getOpenTickets()) {
         if (ticket.claimedBy !== member.id) continue;
@@ -24,10 +23,7 @@ module.exports = {
         store.setClaim(ticket.userId, null);
         await ticketService.refreshHeader(client, ticket);
 
-        await notifyService.sendClaimantLeftNotice(client, ticket, {
-          name: leaverName,
-          avatarURL: leaverAvatar
-        });
+        await notifyService.sendClaimantLeftNotice(client, ticket, { name: leaverName });
 
         await logService.send(
           client,

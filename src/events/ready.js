@@ -87,7 +87,6 @@ async function reconcile(client, category) {
       if (!claimant) {
         const leaverUser = await client.users.fetch(ticket.claimedBy).catch(() => null);
         const leaverName = leaverUser?.username ?? 'A former staff member';
-        const leaverAvatar = leaverUser?.displayAvatarURL({ size: 256 }) ?? null;
 
         store.addLog(ticket.userId, {
           type: 'system',
@@ -98,10 +97,7 @@ async function reconcile(client, category) {
         store.setClaim(ticket.userId, null);
         await ticketService.refreshHeader(client, ticket);
 
-        await notifyService.sendClaimantLeftNotice(client, ticket, {
-          name: leaverName,
-          avatarURL: leaverAvatar
-        });
+        await notifyService.sendClaimantLeftNotice(client, ticket, { name: leaverName });
 
         logger.warn(`Released claim on ticket #${ticket.number}: claimant is no longer in the server.`);
       }

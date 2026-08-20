@@ -42,9 +42,7 @@ function findExistingChannel(channels, user) {
 
 function chooseChannelName(channels, user) {
   const base = sanitizeChannelName(user.username);
-  const existingForUser = findExistingChannel(channels, user);
 
-  if (existingForUser) return existingForUser.name;
   if (!channels.some((channel) => channel.name === base)) return base;
 
   for (let suffix = 2; suffix <= 99; suffix += 1) {
@@ -134,7 +132,6 @@ async function createOrResolveTicket(client, user) {
     name,
     type: ChannelType.GuildText,
     parent: category.id,
-    lockPermissions: true,
     topic: `${ticketTopicPrefix(user.id)} | ${user.username}`,
     reason: `ModMail ticket for ${user.username} (${user.id})`
   });
