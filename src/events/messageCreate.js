@@ -7,7 +7,7 @@ const webhookService = require('../services/webhookService');
 const embeds = require('../utils/embeds');
 
 const CLAIM_WARN_COOLDOWN_MS = 10_000;
-const CLEANUP_DELAY_MS = 30_000;
+const CLEANUP_DELAY_MS = 5_000;
 
 const claimWarnCooldown = new Map();
 
@@ -74,7 +74,7 @@ async function warnClaimRequired(message, ticket) {
     ? await message.reply({ embeds: [embeds.claimWarningEmbed(ticket)] }).catch(() => null)
     : null;
 
-  // Auto-clean the warning AND the offending message after 30 seconds.
+  // Auto-clean the warning AND the offending message after 10 sconds.
   setTimeout(() => {
     if (warning) warning.delete().catch(() => {});
     message.delete().catch(() => {});
