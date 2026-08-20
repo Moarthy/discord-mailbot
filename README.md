@@ -1,188 +1,111 @@
 <div align="center">
 
-# 📬 Discord Mailbot
-### The Ultimate Next-Generation ModMail System for Discord
+# Discord Mailbot
+### Advanced ModMail System for Discord
 
-[![Discord.js](https://img.shields.io/github/package-json/dependency-version/Moarthy/discord-mailbot/discord.js?style=for-the-badge&logo=discord&logoColor=white&color=5865F2)](https://discord.js.org)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org)
-[![License](https://img.shields.io/github/license/Moarthy/discord-mailbot?style=for-the-badge&color=E67E22)](https://choosealicense.com/licenses/mit/)
-[![Release](https://img.shields.io/github/package-json/version/Moarthy/discord-mailbot?style=for-the-badge&label=Release&color=6C5CE7)](https://github.com/Moarthy/discord-mailbot)
-[![Last Commit](https://img.shields.io/github/last-commit/Moarthy/discord-mailbot?style=for-the-badge&label=Last%20Commit&color=007EC6)](https://github.com/Moarthy/discord-mailbot/commits/main)
+[![Discord.js](https://img.shields.io/github/package-json/dependency-version/Moarthy/discord-mailbot/discord.js?style=flat-square&logo=discord&logoColor=white&color=5865F2)](https://discord.js.org)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![License](https://img.shields.io/github/license/Moarthy/discord-mailbot?style=flat-square&color=E67E22)](https://choosealicense.com/licenses/mit/)
+[![Release](https://img.shields.io/github/package-json/version/Moarthy/discord-mailbot?style=flat-square&label=Release&color=6C5CE7)](https://github.com/Moarthy/discord-mailbot)
+[![Last Commit](https://img.shields.io/github/last-commit/Moarthy/discord-mailbot?style=flat-square&label=Last%20Commit&color=007EC6)](https://github.com/Moarthy/discord-mailbot/commits/main)
 
-[Features](#-key-features) • [Installation](#-installation) • [Configuration](#-configuration) • [Commands](#-commands--interactions) • [Architecture](#-architecture)
+[Features](#features) • [Installation](#installation) • [Configuration](#configuration) • [Commands](#commands--interactions) • [Architecture](#architecture)
 
 </div>
 
 ---
 
-## 🌟 Overview
-**Discord Mailbot** is a highly advanced, lightweight, and feature-rich ModMail system built on **Discord.js v14**. Designed for large communities and professional support teams, it bridges the gap between a seamless user experience and powerful staff moderation tools. 
+## Overview
 
-By utilizing **Webhooks**, **Modals**, **Buttons**, and **Typing Indicators**, it delivers a frictionless support experience right inside Discord without the need for external databases or complex web dashboards.
+Discord Mailbot is a lightweight, feature-rich ModMail system built on Discord.js v14. Designed for community support teams, it facilitates seamless communication between server staff and users via direct messages. The system utilizes webhooks, interactive modals, and persistent JSON storage, eliminating the need for external databases while providing a robust moderation environment.
 
----
+## Features
 
-## ✨ Key Features
+*   **Claim-Based Workflow:** Prevents overlapping responses by requiring staff to claim a ticket before interacting. Claims are automatically released if the assigned staff member leaves the server.
+*   **Webhook Integration:** Routes user messages natively into support channels using Discord Webhooks, preserving attachments, formatting, and reply contexts.
+*   **Anonymous Replies:** Allows staff to toggle between personal branding and anonymous "Server Staff" responses to maintain privacy or team cohesion.
+*   **HTML Transcripts:** Generates responsive, color-coded HTML transcripts upon ticket closure, distinguishing between user messages, staff replies, and private internal notes.
+*   **Typing Indicators:** Synchronizes typing states between user DMs and staff channels to provide a real-time conversational experience.
+*   **State Reconciliation:** Automatically cleans up orphaned channels and recovers ticket states during bot restarts or unexpected downtime.
+*   **Blacklist Management:** Blocks abusive users from opening new tickets with persistent, file-based enforcement.
 
-### 🎯 Claim-First Workflow
-Eliminate overlapping replies and confusion. Staff members must **claim** a ticket before interacting with the user. 
-*   **Auto-locking:** Only the claimant can send messages to the user.
-*   **Release Logic:** Unclaim anytime, or let the system automatically release claims if the staff member leaves the server.
+## Installation
 
-### 🕵️ Anonymous & Branded Replies
-Toggle **Anonymous Mode** to reply as the "Server Staff" without revealing your personal Discord username, or keep it transparent to build personal connections with your community.
-
-### 🪝 Seamless Webhook Integration
-Leveraging Discord Webhooks, user messages appear natively inside the support channel. It looks and feels exactly like the user is chatting directly in the server! Attachments are automatically downloaded and re-uploaded flawlessly.
-
-### ⌨️ Real-Time Typing Indicators
-Bridging the gap between DMs and channels. When a user types in their DMs, the ticket channel shows typing, and vice versa, making conversations feel live and natural.
-
-### 📝 Intelligent Transcripts
-Generate beautiful, fully responsive **HTML Transcripts** upon ticket closure.
-*   **User View:** Clean transcript for the user.
-*   **Staff View:** Includes private internal notes and system events.
-*   **Feedback System:** Prompts users via an interactive Modal to leave a rating and feedback after closure.
-
-### 🛡️ Robust State Management & Auto-Reconciliation
-Never lose data, even during unexpected downtime or restarts. 
-*   **Orphan Cleanup:** Automatically deletes ticket channels that lost their state.
-*   **Claim Recovery:** Frees up tickets claimed by staff members who left the guild while the bot was offline.
-*   **JSON-based Storage:** Zero database setup required; persistent lightweight JSON storage with atomic writes.
-
-### ⏱️ Smart Interactions & Cooldowns
-Prevents chat spam and accidental overlaps. If a staff member tries to reply to an unclaimed ticket, the bot warns them and auto-cleans the warning after 30 seconds to keep the channel pristine.
-
-### 🚫 Blacklist System
-Protect your support team from trolls and abusers with a robust, persistent blacklist system. Blocked users are instantly notified upon trying to open a ticket.
-
----
-
-## 🚀 Installation
-
-### Prerequisites
-*   **Node.js** v18.0.0 or higher
-*   **npm** or **yarn**
+**Prerequisites:**
+*   Node.js v18.0.0 or higher
+*   npm or yarn
 *   A Discord Bot Application with **Message Content**, **Server Members**, and **Presence** intents enabled.
 
-### Step-by-Step Setup
-
-1.  **Clone the repository:**
 ```bash
-    git clone https://github.com/Moarthy/discord-mailbot.git
-    cd discord-mailbot
+# Clone the repository
+git clone https://github.com/Moarthy/discord-mailbot.git
+cd discord-mailbot
+
+# Install dependencies
+npm install
+
+# Configure environment variables
+cp .env.example .env
+
+# Deploy slash commands to Discord
+npm run deploy
+
+# Start the application
+npm start
 ```
 
-2.  **Install dependencies:**
-```bash
-    npm install
-```
+## Configuration
 
-3.  **Configure Environment Variables:**
-    Duplicate the example environment file and fill in your secrets:
-```bash
-    cp .env.example .env
-```
+Populate the `.env` file with your Discord credentials and server IDs.
 
-4.  **Deploy Slash Commands:**
-    Register the bot's commands with Discord:
-```bash
-    npm run deploy
-```
+| Variable | Requirement | Description |
+| :--- | :--- | :--- |
+| `DISCORD_TOKEN` | **Required** | Your Discord Bot Token. |
+| `CATEGORY_ID` | **Required** | The ID of the category where ticket channels will be created. |
+| `GUILD_ID` | Optional | Server ID for instant, guild-specific slash command deployment. |
+| `MODERATOR_ROLE_ID` | Optional | Role ID granting staff access to tickets and management commands. |
+| `LOG_CHANNEL_ID` | Optional | Channel ID for system logs, alerts, and closure feedback. |
+| `TRANSCRIPT_CHANNEL_ID` | Optional | Channel ID for automatically archiving generated transcripts. |
+| `DATA_FILE` | Optional | Path to the JSON database file. Defaults to `./data/tickets.json`. |
 
-5.  **Start the Bot:**
-```bash
-    npm start
-```
+*Note: The bot requires `Manage Channels`, `Manage Webhooks`, `Manage Roles`, `Manage Messages`, and `Send Messages` permissions in the target category.*
 
----
-
-## ⚙️ Configuration
-
-Open your `.env` file and configure the following variables:
-
-| Variable | Required | Description |
-| :--- | :---: | :--- |
-| `DISCORD_TOKEN` | ✅ | Your Discord Bot Token. |
-| `CATEGORY_ID` | ✅ | The ID of the category where ticket channels will be created. |
-| `GUILD_ID` | ❌ | (Optional) The ID of your server. Used for instant slash command deployment. |
-| `MODERATOR_ROLE_ID` | ❌ | (Optional) The role ID that grants staff access to commands and tickets. |
-| `LOG_CHANNEL_ID` | ❌ | (Optional) Channel ID to receive system logs, alerts, and feedback. |
-| `TRANSCRIPT_CHANNEL_ID`| ❌ | (Optional) Channel ID to automatically post archived transcripts. |
-| `DATA_FILE` | ❌ | (Optional) Path to the JSON database file. Defaults to `./data/tickets.json`. |
-
-> **⚠️ Permissions Note:** Ensure the bot has `Manage Channels`, `Manage Webhooks`, `Manage Roles`, `Manage Messages`, and `Send Messages` permissions in the designated category!
-
----
-
-## 🎛️ Commands & Interactions
+## Commands & Interactions
 
 ### Slash Commands
+
 | Command | Description |
 | :--- | :--- |
-| `/claim` | Claim or unclaim the current ticket. |
-| `/close [reason]` | Close the ticket and send a formatted receipt to the user. |
-| `/blacklist [add/remove] [user] [reason]` | Manage the blacklist to block/unblock abusive users. |
-| `/note [text]` | Add an internal, private note to the ticket (invisible to the user). |
-| `/transcript` | Generate and download the HTML transcript for the current ticket. |
-| `/info` | Display user stats, account creation date, and ticket metadata. |
+| `/claim` | Claim or unclaim the active ticket. |
+| `/close [reason]` | Close the ticket, prompt for feedback, and generate a transcript. |
+| `/blacklist [add/remove] [user]` | Manage the user blacklist. |
+| `/note [text]` | Add an internal note invisible to the user. |
+| `/transcript` | Manually generate and download the HTML transcript. |
+| `/info` | Display user metadata, join dates, and ticket statistics. |
 
-### Interactive Buttons
-Every active ticket features a dynamic header with interactive buttons:
-*   **🟢 Claim / 🔴 Unclaim:** Assign yourself to the ticket.
-*   **🕶️ Anon:** Toggle anonymous replies.
-*   **📄 Transcript:** Instantly download the ticket history.
-*   **🛑 Close:** Opens a modal to input a closure reason.
+### Interactive Components
 
----
+Active tickets feature a header embed containing interactive buttons for claiming, toggling anonymous mode, downloading transcripts, and opening a closure modal. Staff replies are routed via ephemeral interactions to prevent accidental public disclosures.
 
-## 🏗️ Architecture
+## Architecture
 
-Discord Mailbot is engineered with scalability and maintainability in mind, utilizing a strictly modular architecture:
+The project follows a strictly modular structure to ensure maintainability:
 
-*   **`src/services/`**: Contains core business logic (ticket creation, webhooks, transcripts, closures).
-*   **`src/events/`**: Event listeners mapped to specific Discord Gateway events.
+*   **`src/services/`**: Core business logic (webhooks, transcripts, state management, closures).
+*   **`src/events/`**: Discord Gateway event listeners mapped to specific actions.
 *   **`src/commands/`**: Self-contained Slash Command modules.
-*   **`src/interactions/`**: Handles complex UI interactions like Buttons and Modals.
-*   **`src/utils/`**: Shared utilities (embed builders, time formatting, permission checks).
+*   **`src/interactions/`**: Handlers for complex UI interactions (buttons and modals).
 *   **`src/store/`**: Singleton JSON persistence manager with atomic file writes and backfill support.
 
----
+## Contributing
 
-## 📸 Previews
+Contributions, issues, and feature requests are welcome. 
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/NewFeature`).
+3. Commit your changes (`git commit -m 'Add NewFeature'`).
+4. Push to the branch (`git push origin feature/NewFeature`).
+5. Open a Pull Request.
 
-**Ticket Header:**
-> Displays user information, ticket number, join dates, and interactive action buttons in a sleek embed.
-
-**Staff Reply:**
-> Staff replies are beautifully formatted in the user's DMs, complete with staff branding (or anonymous server branding) and attachment support.
-
-**HTML Transcripts:**
-> Dark-themed, responsive HTML files that clearly differentiate between user messages, staff replies, internal notes, and system events via color-coded borders.
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📜 License
+## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-<div align="center">
-  
-  **Crafted with ❤️ by [Moarthy]**
-  
-  *Empowering Discord communities with professional support tools.*
-  
-</div>
