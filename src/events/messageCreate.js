@@ -116,7 +116,7 @@ async function handleGuildMessage(client, message) {
       .join('\n');
 
     await user.send({
-      embeds: [embeds.staffReplyEmbed({ senderName, iconURL, content, ticket, anonymous })],
+      embeds: [embeds.staffReplyEmbed({ senderName, iconURL, content, anonymous })],
       files
     }).catch(() => {});
   }

@@ -87,11 +87,9 @@ function claimLockedEmbed(ticket) {
 
 // No color on purpose: staff replies show without a stripe.
 // In anonymous mode the author line (name + icon) is removed entirely.
-function staffReplyEmbed({ senderName, iconURL, content, ticket, anonymous = false }) {
+function staffReplyEmbed({ senderName, iconURL, content, anonymous = false }) {
   const embed = new EmbedBuilder()
-    .setDescription(content || '*Attachments only*')
-    .setFooter({ text: `Ticket ${ticketNumberLabel(ticket.number)}` })
-    .setTimestamp();
+    .setDescription(content || '*Attachments only*');
 
   if (!anonymous) {
     embed.setAuthor({ name: `Staff · ${senderName}`, iconURL: iconURL ?? null });
