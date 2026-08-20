@@ -1,4 +1,4 @@
-const { ChannelType, PermissionsBitField } = require('discord.js');
+const { ChannelType, PermissionsBitField, ActivityType } = require('discord.js');
 
 const config = require('../config');
 const store = require('../store/ticketStore');
@@ -10,6 +10,11 @@ module.exports = {
   name: 'ready',
   async execute(client) {
     logger.info(`Logged in as ${client.user.tag}.`);
+
+    client.user.setPresence({
+      activities: [{ type: ActivityType.Playing, name: '📬 /help for the 30-second guide' }],
+      status: 'online'
+    });
 
     try {
       const category = await client.channels.fetch(config.categoryId);

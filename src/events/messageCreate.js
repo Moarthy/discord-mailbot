@@ -74,7 +74,7 @@ async function warnClaimRequired(message, ticket) {
     ? await message.reply({ embeds: [embeds.claimWarningEmbed(ticket)] }).catch(() => null)
     : null;
 
-  // Auto-clean the warning AND the offending message after 10 sconds.
+  // Auto-clean the warning AND the offending message after 30 seconds.
   setTimeout(() => {
     if (warning) warning.delete().catch(() => {});
     message.delete().catch(() => {});
@@ -101,24 +101,23 @@ async function handleGuildMessage(client, message) {
   if (user) {
     const anonymous = Boolean(ticket.anonymous);
     const senderName = anonymous ? 'Anonymous' : (message.member?.displayName || message.author.username);
-    const iconURL = anonymous ? message.guild.iconURL() : message.author.displayAvatarURL({ size: 256 });
 
-    const files = [];
-    for (const attachment of message.attachments.values()) {
-      if (attachment.size <= 8_000_000) {
-        const file = await webhookService.downloadAttachment(attachment);
-        if (file) files.push(file);
-      }
+    // Attachments: plain text with URLs, no embed, no download.
+    if (attachmentUrls.length) {
+      const lines = [];
+      if (!anonymous) lines.push(`**Staff · ${senderName}**:`);
+      if (message.content) lines.push(message.content);
+      lines.push(...attachmentUrls);
+
+      await user.send({ content: lines.join('\n') }).catch(() => {});
+    } else {
+      // Text-only: use the embed as before (author line stripped when anonymous).
+      const iconURL = anonymous ? message.guild.iconURL() : message.author.displayAvatarURL({ size: 256 });
+
+      await user.send({
+        embeds: [embeds.staffReplyEmbed({ senderName, iconURL, content: message.content, ticket, anonymous })]
+      }).catch(() => {});
     }
-
-    const content = [message.content, attachmentUrls.length ? `Attachments:\n${attachmentUrls.join('\n')}` : null]
-      .filter(Boolean)
-      .join('\n');
-
-    await user.send({
-      embeds: [embeds.staffReplyEmbed({ senderName, iconURL, content, anonymous })],
-      files
-    }).catch(() => {});
   }
 
   store.addLog(ticket.userId, {

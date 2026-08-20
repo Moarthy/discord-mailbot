@@ -40,68 +40,29 @@ function getSendableWebhook(webhook, ticket) {
   throw new Error('No valid webhook token available.');
 }
 
-async function downloadAttachment(attachment) {
-  try {
-    const response = await fetch(attachment.url, { signal: AbortSignal.timeout(15_000) });
-    if (!response.ok) return null;
-
-    const buffer = Buffer.from(await response.arrayBuffer());
-    const safeName = (attachment.name || `attachment-${Date.now()}`).replace(/[^\w.\-]+/g, '_');
-
-    return { attachment: buffer, name: safeName };
-  } catch {
-    return null;
-  }
-}
-
 async function sendUserMessageToTicket({ webhook, user, message, ticket = null }) {
   const sendable = getSendableWebhook(webhook, ticket);
 
   try {
     const avatarURL = user.displayAvatarURL({ extension: 'png', size: 256 });
-    const files = [];
-    const failedUrls = [];
-    const attachmentUrls = [];
-
-    for (const attachment of message.attachments.values()) {
-      attachmentUrls.push(attachment.url);
-
-      if (attachment.size > 8_000_000) {
-        failedUrls.push(attachment.url);
-        continue;
-      }
-
-      const file = await downloadAttachment(attachment);
-      if (file) files.push(file);
-      else failedUrls.push(attachment.url);
-    }
+    const attachmentUrls = message.attachments.map((attachment) => attachment.url);
 
     const textParts = [];
     if (message.content) textParts.push(message.content);
-    if (failedUrls.length) textParts.push(`Attachment links:\n${failedUrls.join('\n')}`);
+    if (attachmentUrls.length) textParts.push(attachmentUrls.join('\n'));
 
     const chunks = splitMessage(textParts.join('\n'), 1900);
-    if (!chunks.length && files.length === 0) chunks.push('[No content]');
-    if (!chunks.length) chunks.push('');
+    if (!chunks.length) chunks.push('[No content]');
 
     const basePayload = { username: user.username, avatarURL, allowedMentions: { parse: [] } };
 
-    for (let index = 0; index < chunks.length; index += 1) {
-      const payload = { ...basePayload, content: chunks[index] || undefined };
-      if (index === 0 && files.length) payload.files = files;
+    for (const chunk of chunks) {
+      const payload = { ...basePayload, content: chunk };
 
       try {
         await sendable.send(payload);
       } catch (error) {
-        logger.error('Webhook send failed; falling back to links.', error);
-
-        const fallback = [chunks[index], attachmentUrls.length ? `Attachments:\n${attachmentUrls.join('\n')}` : null]
-          .filter(Boolean)
-          .join('\n');
-
-        for (const chunk of splitMessage(fallback, 1900)) {
-          await sendable.send({ ...basePayload, content: chunk }).catch(() => {});
-        }
+        logger.error('Webhook send failed.', error);
       }
     }
   } finally {
@@ -109,4 +70,4 @@ async function sendUserMessageToTicket({ webhook, user, message, ticket = null }
   }
 }
 
-module.exports = { getOrCreateWebhook, sendUserMessageToTicket, downloadAttachment };
+module.exports = { getOrCreateWebhook, sendUserMessageToTicket };
