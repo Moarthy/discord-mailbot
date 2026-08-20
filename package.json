@@ -1,0 +1,16 @@
+{
+  "name": "discord-modmail-bot",
+  "version": "2.0.0",
+  "license": "MIT",
+  "description": "Advanced ModMail bot with slash commands, embeds, transcripts and ratings.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy": "node src/deploy-commands.js"
+  },
+  "engines": { "node": ">=18.0.0" },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  }
+}
