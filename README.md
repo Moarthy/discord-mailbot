@@ -3,10 +3,11 @@
 # 📬 Discord Mailbot
 ### The Ultimate Next-Generation ModMail System for Discord
 
-![Discord.js](https://img.shields.io/badge/Discord.js-v14-blue?style=for-the-badge&logo=discord)
-![Node.js](https://img.shields.io/badge/Node.js-v18%2B-green?style=for-the-badge&logo=node.js)
-![License](https://img.shields.io/badge/License-MIT-orange?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
+[![Discord.js](https://img.shields.io/github/package-json/dependency-version/Moarthy/discord-mailbot/discord.js?style=for-the-badge&logo=discord&logoColor=white&color=5865F2)](https://discord.js.org)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org)
+[![License](https://img.shields.io/github/license/Moarthy/discord-mailbot?style=for-the-badge&color=E67E22)](https://choosealicense.com/licenses/mit/)
+[![Release](https://img.shields.io/github/package-json/version/Moarthy/discord-mailbot?style=for-the-badge&label=Release&color=6C5CE7)](https://github.com/Moarthy/discord-mailbot)
+[![Last Commit](https://img.shields.io/github/last-commit/Moarthy/discord-mailbot?style=for-the-badge&label=Last%20Commit&color=007EC6)](https://github.com/Moarthy/discord-mailbot/commits/main)
 
 [Features](#-key-features) • [Installation](#-installation) • [Configuration](#-configuration) • [Commands](#-commands--interactions) • [Architecture](#-architecture)
 
