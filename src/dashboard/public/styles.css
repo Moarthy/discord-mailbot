@@ -227,6 +227,11 @@ tbody tr:hover { background: var(--panel-2); cursor: pointer; }
   z-index: 100;
   padding: 24px;
 }
+/* `display:flex` above overrides the browser's default `[hidden]{display:none}`,
+   so we must re-hide the backdrop explicitly. */
+.modal-backdrop[hidden] {
+  display: none;
+}
 .modal {
   background: var(--panel);
   border: 1px solid var(--border);
