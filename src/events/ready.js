@@ -4,12 +4,14 @@ const config = require('../config');
 const store = require('../store/ticketStore');
 const ticketService = require('../services/ticketService');
 const notifyService = require('../services/notifyService');
+const auditService = require('../services/auditService');
 const logger = require('../utils/logger');
 
 module.exports = {
   name: 'ready',
   async execute(client) {
     logger.info(`Logged in as ${client.user.tag}.`);
+    auditService.bot.ready({ tag: client.user.tag, id: client.user.id, guilds: client.guilds.cache.size });
 
     client.user.setPresence({
       activities: [{ type: ActivityType.Playing, name: '/help for the 30-second guide' }],
@@ -75,6 +77,7 @@ async function reconcile(client, category) {
   for (const channel of ticketChannels.values()) {
     if (!store.getByChannelId(channel.id)) {
       logger.warn(`Removing orphaned ticket channel #${channel.name} (no active ticket).`);
+      auditService.ticket.orphanChannelRemoved({ channelId: channel.id, channelName: channel.name });
       await channel.delete('Orphaned ModMail ticket channel.').catch(() => {});
     }
   }
@@ -83,6 +86,7 @@ async function reconcile(client, category) {
     const cachedChannel = guild.channels.cache.get(ticket.channelId);
     if (!cachedChannel || cachedChannel.parentId !== category.id) {
       logger.warn(`Archiving ticket #${ticket.number} whose channel no longer exists or was moved out of the ModMail category.`);
+      auditService.ticket.archivedAtStartup(ticket, { channelId: ticket.channelId });
       store.closeTicket(ticket.userId, { closedBy: null, reason: 'Channel missing at startup.' });
       continue;
     }
@@ -104,6 +108,8 @@ async function reconcile(client, category) {
         await ticketService.refreshHeader(client, ticket);
 
         await notifyService.sendClaimantLeftNotice(client, ticket, { name: leaverName });
+
+        auditService.ticket.claimReleasedByLeave(ticket, { claimantId: ticket.claimedBy, leaverName, offline: true });
 
         logger.warn(`Released claim on ticket #${ticket.number}: claimant is no longer in the server.`);
       }

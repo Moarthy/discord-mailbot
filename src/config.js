@@ -18,6 +18,11 @@ const logChannelId = optional('LOG_CHANNEL_ID');
 const transcriptChannelId = optional('TRANSCRIPT_CHANNEL_ID');
 const dataFileRaw = optional('DATA_FILE');
 
+const dashboardPortRaw = optional('DASHBOARD_PORT');
+const dashboardPort = Number.parseInt(dashboardPortRaw || '3000', 10) || 3000;
+const dashboardHost = optional('DASHBOARD_HOST') || '0.0.0.0';
+const dashboardToken = optional('DASHBOARD_TOKEN');
+
 module.exports = {
   token: required('DISCORD_TOKEN'),
   categoryId: required('CATEGORY_ID'),
@@ -27,5 +32,8 @@ module.exports = {
   transcriptChannelId,
   dataFile: dataFileRaw
     ? path.resolve(dataFileRaw)
-    : path.join(process.cwd(), 'data', 'tickets.json')
+    : path.join(process.cwd(), 'data', 'tickets.json'),
+  dashboardPort,
+  dashboardHost,
+  dashboardToken
 };

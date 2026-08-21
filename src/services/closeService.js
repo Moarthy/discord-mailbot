@@ -3,6 +3,7 @@ const { MessageFlags } = require('discord.js');
 const store = require('../store/ticketStore');
 const config = require('../config');
 const embeds = require('../utils/embeds');
+const auditService = require('./auditService');
 const transcriptService = require('./transcriptService');
 const logService = require('./logService');
 const { isModerator } = require('../utils/permissions');
@@ -80,6 +81,8 @@ async function executeClose(interaction, reason = '') {
     staffTranscript: transcripts.staffTranscript,
     userTranscript: transcripts.userTranscript
   });
+
+  auditService.ticket.closed(ticket, { id: interaction.user.id, tag: interaction.user.tag }, { reason });
 
   await interaction.editReply({
     embeds: [embeds.systemEmbed(`Ticket closed.${reason ? ` Reason: ${reason}` : ''} Deleting channel…`)]

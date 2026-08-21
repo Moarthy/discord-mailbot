@@ -3,6 +3,7 @@ const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const store = require('../store/ticketStore');
 const embeds = require('../utils/embeds');
 const logService = require('../services/logService');
+const auditService = require('../services/auditService');
 const { isModerator } = require('../utils/permissions');
 
 module.exports = {
@@ -48,6 +49,11 @@ module.exports = {
 
       store.blacklistAdd(target.id, { reason, byId: interaction.user.id });
 
+      auditService.blacklist.added(
+        { id: interaction.user.id, tag: interaction.user.tag },
+        { targetId: target.id, targetTag: target.tag, reason }
+      );
+
       await logService.send(
         interaction.client,
         embeds.systemEmbed(`⛔ ${target.tag} was blacklisted by ${interaction.user.tag}. Reason: ${reason}`, embeds.Colors.danger)
@@ -59,6 +65,11 @@ module.exports = {
     if (sub === 'remove') {
       const target = interaction.options.getUser('user');
       store.blacklistRemove(target.id);
+
+      auditService.blacklist.removed(
+        { id: interaction.user.id, tag: interaction.user.tag },
+        { targetId: target.id, targetTag: target.tag }
+      );
 
       await logService.send(
         interaction.client,

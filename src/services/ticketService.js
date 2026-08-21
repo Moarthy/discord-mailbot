@@ -3,6 +3,7 @@ const { ChannelType } = require('discord.js');
 const config = require('../config');
 const store = require('../store/ticketStore');
 const logger = require('../utils/logger');
+const auditService = require('./auditService');
 const webhookService = require('./webhookService');
 const embeds = require('../utils/embeds');
 const { sanitizeChannelName } = require('../utils/text');
@@ -126,6 +127,8 @@ async function createOrResolveTicket(client, user) {
 
     const webhook = await resolveWebhook(existingChannel, user, ticket);
 
+    auditService.ticket.recovered(ticket);
+
     // Orphaned channel recovered: ensure it has a proper header and mention.
     try {
       if (config.moderatorRoleId) {
@@ -184,6 +187,8 @@ async function createOrResolveTicket(client, user) {
 
     store.updateTicket(user.id, { headerMessageId: headerMessage.id });
     ticket.headerMessageId = headerMessage.id;
+
+    auditService.ticket.opened(ticket);
 
     logger.info(`Created ticket #${ticket.number} (#${channel.name}) for ${user.username}.`);
 

@@ -2,7 +2,10 @@ const { MessageFlags } = require('discord.js');
 
 const store = require('../store/ticketStore');
 const embeds = require('../utils/embeds');
+const auditService = require('./auditService');
 const ticketService = require('./ticketService');
+
+const actor = (interaction) => ({ id: interaction.user.id, tag: interaction.user.tag });
 
 async function executeClaim(interaction) {
   const ticket = store.getByChannelId(interaction.channelId);
@@ -17,6 +20,7 @@ async function executeClaim(interaction) {
   // The claimant releases the ticket.
   if (ticket.claimedBy === interaction.user.id) {
     store.setClaim(ticket.userId, null);
+    auditService.ticket.released(ticket, actor(interaction));
     await ticketService.refreshHeader(interaction.client, ticket);
     return interaction.reply({ embeds: [embeds.systemEmbed('🎫 Ticket released.')] });
   }
@@ -36,6 +40,8 @@ async function executeClaim(interaction) {
   const takeover = Boolean(ticket.claimedBy);
 
   store.setClaim(ticket.userId, interaction.user.id);
+  if (takeover) auditService.ticket.takeover(ticket, actor(interaction));
+  else auditService.ticket.claimed(ticket, actor(interaction));
   await ticketService.refreshHeader(interaction.client, ticket);
 
   return interaction.reply({

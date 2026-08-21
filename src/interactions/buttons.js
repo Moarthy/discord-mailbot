@@ -10,6 +10,7 @@ const store = require('../store/ticketStore');
 const embeds = require('../utils/embeds');
 const ticketService = require('../services/ticketService');
 const claimService = require('../services/claimService');
+const auditService = require('../services/auditService');
 const transcriptService = require('../services/transcriptService');
 const { isModerator } = require('../utils/permissions');
 
@@ -88,6 +89,7 @@ module.exports = {
 
       const newAnonymous = !ticket.anonymous;
       store.setAnonymous(ticket.userId, newAnonymous);
+      auditService.ticket.anonToggled(ticket, { id: interaction.user.id, tag: interaction.user.tag }, { value: newAnonymous });
       await ticketService.refreshHeader(interaction.client, ticket);
       return interaction.reply({
         embeds: [embeds.systemEmbed(newAnonymous ? '🕶 Anonymous replies are now ON.' : '🕶 Anonymous replies are now OFF.')],

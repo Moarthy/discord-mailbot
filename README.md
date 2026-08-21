@@ -28,6 +28,8 @@ Discord Mailbot is a lightweight, feature-rich ModMail system built on Discord.j
 *   **Typing Indicators:** Synchronizes typing states between user DMs and staff channels to provide a real-time conversational experience.
 *   **State Reconciliation:** Automatically cleans up orphaned channels and recovers ticket states during bot restarts or unexpected downtime.
 *   **Blacklist Management:** Blocks abusive users from opening new tickets with persistent, file-based enforcement.
+*   **Web Dashboard:** Launch a local HTTP dashboard (with the `--dashboard` flag) showing live ticket/claim/moderator stats, bot & project health, RAM usage, and a full conversation browser.
+*   **Durable Audit Logging:** Structured, append-only JSONL logs (`logs/bot.log` and `logs/audit.log`) that faithfully record every sensitive action (claims, closures, blacklists, feedback, startup/shutdown, errors) with sequence numbers and timestamps.
 
 ## Installation
 
@@ -67,6 +69,9 @@ Populate the `.env` file with your Discord credentials and server IDs.
 | `LOG_CHANNEL_ID` | Optional | Channel ID for system logs, alerts, and closure feedback. |
 | `TRANSCRIPT_CHANNEL_ID` | Optional | Channel ID for automatically archiving generated transcripts. |
 | `DATA_FILE` | Optional | Path to the JSON database file. Defaults to `./data/tickets.json`. |
+| `DASHBOARD_PORT` | Optional | Port for the web dashboard. Defaults to `3000`. |
+| `DASHBOARD_HOST` | Optional | Interface the dashboard binds to. Defaults to `0.0.0.0`. |
+| `DASHBOARD_TOKEN` | Optional | When set, the dashboard requires this token (`?token=…` or `Authorization: Bearer …`). |
 
 *Note: The bot requires `Manage Channels`, `Manage Webhooks`, `Manage Roles`, `Manage Messages`, and `Send Messages` permissions in the target category.*
 
@@ -96,6 +101,34 @@ The project follows a strictly modular structure to ensure maintainability:
 *   **`src/commands/`**: Self-contained Slash Command modules.
 *   **`src/interactions/`**: Handlers for complex UI interactions (buttons and modals).
 *   **`src/store/`**: Singleton JSON persistence manager with atomic file writes and backfill support.
+*   **`src/dashboard/`**: Local web dashboard (HTTP server, snapshot collector, and static frontend).
+
+## Web Dashboard
+
+Start the bot with the `--dashboard` flag (or `npm run dashboard`) to launch a local web dashboard alongside the bot:
+
+```bash
+npm run dashboard          # or: node src/index.js --dashboard
+```
+
+Open `http://localhost:3000` (or your configured `DASHBOARD_PORT`) in a browser. The dashboard provides:
+
+*   **Live statistics** — open/archived tickets, moderators, active claims, unique users, and blacklist size.
+*   **Bot & project health** — gateway status, WebSocket ping, uptime, package version, and configuration summary.
+*   **RAM & system metrics** — process RSS/heap, system memory, CPU load average, and host details.
+*   **Detailed views** — moderator profiles (roles, active claims, tickets closed), ticket authors, the claim→ticket mapping, and full per-ticket conversations (open tickets show live message history; closed tickets link to their HTML transcripts).
+*   **Audit & log stream** — a live, filterable view of both the general log and the sensitive audit log, with per-file persistence to `logs/`.
+
+### Durable, trustworthy logging
+
+All logging is written to two append-only JSONL files under `logs/`:
+
+| File | Contents |
+| :--- | :--- |
+| `logs/bot.log` | General application logs (debug/info/warn/error). |
+| `logs/audit.log` | Sensitive / important events: ticket opened/claimed/released/taken-over/closed, blacklist changes, internal notes, feedback, claim releases, orphan cleanup, startup/shutdown, and uncaught errors. |
+
+Reliability guarantees: every entry receives a monotonically increasing sequence number and an ISO-8601 timestamp *before* it is emitted; entries are appended synchronously so a logged event is guaranteed to be on disk before the caller continues; files auto-rotate past 10 MB. The in-memory ring buffer that powers the dashboard is a view over the same entries, so what you see is exactly what is persisted.
 
 ## Contributing
 

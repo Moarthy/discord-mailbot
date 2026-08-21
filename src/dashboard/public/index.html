@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ModMail Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">📬</span>
+      <div>
+        <h1 id="brand-name">ModMail Dashboard</h1>
+        <span class="subtitle" id="brand-version">—</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="pill" id="status-pill"><span class="dot"></span><span id="status-text">Connecting…</span></span>
+      <span class="meta" id="last-updated">—</span>
+    </div>
+  </header>
+
+  <section class="stats" id="stats"></section>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="tickets">Tickets</button>
+    <button class="tab" data-tab="moderators">Moderators</button>
+    <button class="tab" data-tab="users">Users</button>
+    <button class="tab" data-tab="claims">Claims</button>
+    <button class="tab" data-tab="logs">Logs</button>
+  </nav>
+
+  <main>
+    <section class="panel active" id="panel-overview"></section>
+    <section class="panel" id="panel-tickets"></section>
+    <section class="panel" id="panel-moderators"></section>
+    <section class="panel" id="panel-users"></section>
+    <section class="panel" id="panel-claims"></section>
+    <section class="panel" id="panel-logs"></section>
+  </main>
+
+  <div class="modal-backdrop" id="modal-backdrop" hidden>
+    <div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

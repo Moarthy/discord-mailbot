@@ -1,5 +1,6 @@
 const store = require('../store/ticketStore');
 const embeds = require('../utils/embeds');
+const auditService = require('../services/auditService');
 const logger = require('../utils/logger');
 
 module.exports = {
@@ -18,6 +19,7 @@ module.exports = {
       }
 
       store.closeTicket(ticket.userId, { closedBy: null, reason: 'Channel manually deleted.' });
+      auditService.ticket.channelDeleted(ticket, { channelId: channel.id });
       logger.info(`Archived ticket #${ticket.number} after manual channel deletion.`);
     } catch (error) {
       logger.error('Failed to clean ticket data after channel delete.', error);

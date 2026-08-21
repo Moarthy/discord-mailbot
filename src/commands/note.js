@@ -2,6 +2,7 @@ const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 const store = require('../store/ticketStore');
 const embeds = require('../utils/embeds');
+const auditService = require('../services/auditService');
 const { isModerator } = require('../utils/permissions');
 
 module.exports = {
@@ -29,6 +30,8 @@ module.exports = {
     const authorName = interaction.member.displayName || interaction.user.username;
 
     store.addLog(ticket.userId, { type: 'note', authorName, content: text });
+
+    auditService.ticket.noteAdded(ticket, { id: interaction.user.id, tag: interaction.user.tag });
 
     await interaction.channel.send({ embeds: [embeds.noteEmbed(authorName, text, ticket)] });
     return interaction.reply({ embeds: [embeds.systemEmbed('📝 Note added.')], flags: MessageFlags.Ephemeral });

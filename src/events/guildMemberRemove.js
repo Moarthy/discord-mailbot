@@ -2,6 +2,7 @@ const store = require('../store/ticketStore');
 const ticketService = require('../services/ticketService');
 const notifyService = require('../services/notifyService');
 const logService = require('../services/logService');
+const auditService = require('../services/auditService');
 const embeds = require('../utils/embeds');
 const logger = require('../utils/logger');
 
@@ -31,6 +32,8 @@ module.exports = {
             `🎫 Claim released on ticket ${embeds.ticketNumberLabel(ticket.number)} (claimant left the server).`
           )
         );
+
+        auditService.ticket.claimReleasedByLeave(ticket, { claimantId: member.id, leaverName });
       }
     } catch (error) {
       logger.error('Failed to handle guildMemberRemove.', error);

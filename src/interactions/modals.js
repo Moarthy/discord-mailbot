@@ -3,6 +3,7 @@ const { MessageFlags } = require('discord.js');
 const store = require('../store/ticketStore');
 const embeds = require('../utils/embeds');
 const logService = require('../services/logService');
+const auditService = require('../services/auditService');
 const closeService = require('../services/closeService');
 
 module.exports = {
@@ -30,6 +31,8 @@ module.exports = {
       }
 
       store.setFeedback(number, text);
+
+      auditService.ticket.feedbackReceived(record, { id: interaction.user.id, tag: interaction.user.tag });
 
       await logService.send(
         interaction.client,

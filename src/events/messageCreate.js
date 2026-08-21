@@ -2,6 +2,7 @@ const { ChannelType } = require('discord.js');
 
 const store = require('../store/ticketStore');
 const logger = require('../utils/logger');
+const auditService = require('../services/auditService');
 const ticketService = require('../services/ticketService');
 const webhookService = require('../services/webhookService');
 const embeds = require('../utils/embeds');
@@ -47,6 +48,7 @@ async function handleDirectMessage(client, message) {
 
   const blocked = store.getBlacklist(user.id);
   if (blocked) {
+    auditService.ticket.blockedUserRefused({ userId: user.id, tag: user.tag, reason: blocked.reason });
     await user.send({ embeds: [embeds.refusedEmbed(blocked)] }).catch(() => {});
     return;
   }
