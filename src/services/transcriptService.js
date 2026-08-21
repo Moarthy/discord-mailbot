@@ -4,6 +4,7 @@ const path = require('node:path');
 const config = require('../config');
 const { escapeHtml } = require('../utils/text');
 const { ticketNumberLabel } = require('../utils/embeds');
+const logger = require('../utils/logger');
 
 const STYLE = `
   body{background:#1e1f22;color:#dbdee1;font:14px/1.5 'Segoe UI',sans-serif;margin:0;padding:24px}
@@ -99,6 +100,7 @@ function writeArchives(ticket) {
 
     return { staffTranscript: staffName, userTranscript: userName };
   } catch (error) {
+    logger.error('Failed to write transcript archives.', error);
     return { staffTranscript: null, userTranscript: null };
   }
 }

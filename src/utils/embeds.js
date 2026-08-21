@@ -7,7 +7,6 @@ const Colors = {
   success: 0x57f287,
   danger: 0xed4245,
   warning: 0xfee75c,
-  staff: 0x57f287,
   note: 0xfee75c,
   system: 0x99aab5,
   feedback: 0xe6b800

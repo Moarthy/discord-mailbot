@@ -104,6 +104,8 @@ async function createOrResolveTicket(client, user) {
 
     if (channel && channel.type === ChannelType.GuildText && channel.parentId === category.id) {
       const webhook = await resolveWebhook(channel, user, existingTicket);
+      // Ensure header exists even if it was deleted while the ticket was open.
+      await refreshHeader(client, existingTicket).catch(() => {});
       return { channel, webhook, created: false, ticket: existingTicket };
     }
 
@@ -123,6 +125,20 @@ async function createOrResolveTicket(client, user) {
     });
 
     const webhook = await resolveWebhook(existingChannel, user, ticket);
+
+    // Orphaned channel recovered: ensure it has a proper header and mention.
+    try {
+      if (config.moderatorRoleId) {
+        await existingChannel.send({
+          content: `📬 New ticket opened · <@&${config.moderatorRoleId}>`,
+          allowedMentions: { roles: [config.moderatorRoleId] }
+        }).catch(() => {});
+      }
+      await refreshHeader(client, ticket);
+    } catch {
+      // Header recreation is best-effort; webhook still works.
+    }
+
     return { channel: existingChannel, webhook, created: false, ticket };
   }
 

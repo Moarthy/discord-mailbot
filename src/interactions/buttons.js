@@ -11,8 +11,6 @@ const embeds = require('../utils/embeds');
 const ticketService = require('../services/ticketService');
 const claimService = require('../services/claimService');
 const transcriptService = require('../services/transcriptService');
-const closeService = require('../services/closeService');
-const logService = require('../services/logService');
 const { isModerator } = require('../utils/permissions');
 
 const EPHEMERAL = { flags: MessageFlags.Ephemeral };
@@ -88,10 +86,11 @@ module.exports = {
         return interaction.reply({ embeds: [embeds.claimWarningEmbed(ticket)], ...EPHEMERAL });
       }
 
-      store.setAnonymous(ticket.userId, !ticket.anonymous);
+      const newAnonymous = !ticket.anonymous;
+      store.setAnonymous(ticket.userId, newAnonymous);
       await ticketService.refreshHeader(interaction.client, ticket);
       return interaction.reply({
-        embeds: [embeds.systemEmbed(ticket.anonymous ? '🕶 Anonymous replies are now ON.' : '🕶 Anonymous replies are now OFF.')],
+        embeds: [embeds.systemEmbed(newAnonymous ? '🕶 Anonymous replies are now ON.' : '🕶 Anonymous replies are now OFF.')],
         ...EPHEMERAL
       });
     }

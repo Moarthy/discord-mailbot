@@ -80,8 +80,9 @@ async function reconcile(client, category) {
   }
 
   for (const ticket of store.getOpenTickets()) {
-    if (!guild.channels.cache.has(ticket.channelId)) {
-      logger.warn(`Archiving ticket #${ticket.number} whose channel no longer exists.`);
+    const cachedChannel = guild.channels.cache.get(ticket.channelId);
+    if (!cachedChannel || cachedChannel.parentId !== category.id) {
+      logger.warn(`Archiving ticket #${ticket.number} whose channel no longer exists or was moved out of the ModMail category.`);
       store.closeTicket(ticket.userId, { closedBy: null, reason: 'Channel missing at startup.' });
       continue;
     }

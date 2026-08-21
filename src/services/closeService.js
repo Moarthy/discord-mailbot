@@ -85,6 +85,14 @@ async function executeClose(interaction, reason = '') {
     embeds: [embeds.systemEmbed(`Ticket closed.${reason ? ` Reason: ${reason}` : ''} Deleting channel…`)]
   }).catch(() => {});
 
+  // Prevent the just-closed channel from being reused as an orphaned channel
+  // if the user DMs again during the deletion delay.
+  try {
+    await interaction.channel.setTopic(`Closed ticket ${embeds.ticketNumberLabel(ticket.number)} - pending deletion`).catch(() => {});
+  } catch {
+    // Ignore topic update failures.
+  }
+
   setTimeout(() => {
     interaction.channel.delete('Ticket closed.').catch((error) => logger.error('Failed to delete ticket channel.', error));
   }, 1500);

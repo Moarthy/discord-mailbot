@@ -23,8 +23,6 @@ const client = new Client({
   partials: [Partials.Channel]
 });
 
-client.config = config;
-
 client.once(Events.ClientReady, () => ready.execute(client));
 client.on('messageCreate', (message) => messageCreate.execute(client, message));
 client.on('channelDelete', (channel) => channelDelete.execute(client, channel));
