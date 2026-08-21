@@ -74,7 +74,7 @@ async function warnClaimRequired(message, ticket) {
     ? await message.reply({ embeds: [embeds.claimWarningEmbed(ticket)] }).catch(() => null)
     : null;
 
-  // Auto-clean the warning AND the offending message after 30 seconds.
+  // Auto-clean the warning AND the offending message after 5 seconds.
   setTimeout(() => {
     if (warning) warning.delete().catch(() => {});
     message.delete().catch(() => {});
@@ -115,7 +115,7 @@ async function handleGuildMessage(client, message) {
       const iconURL = anonymous ? message.guild.iconURL() : message.author.displayAvatarURL({ size: 256 });
 
       await user.send({
-        embeds: [embeds.staffReplyEmbed({ senderName, iconURL, content: message.content, ticket, anonymous })]
+        embeds: [embeds.staffReplyEmbed({ senderName, iconURL, content: message.content, anonymous })]
       }).catch(() => {});
     }
   }
