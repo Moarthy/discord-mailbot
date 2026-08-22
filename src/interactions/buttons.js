@@ -11,6 +11,7 @@ const embeds = require('../utils/embeds');
 const ticketService = require('../services/ticketService');
 const claimService = require('../services/claimService');
 const transcriptService = require('../services/transcriptService');
+const dashboardService = require('../services/dashboardService');
 const { isModerator } = require('../utils/permissions');
 
 const EPHEMERAL = { flags: MessageFlags.Ephemeral };
@@ -51,6 +52,10 @@ function buildCloseModal() {
 
 module.exports = {
   async execute(interaction) {
+    if (interaction.customId.startsWith('dashboard:')) {
+      return dashboardService.handleButton(interaction);
+    }
+
     if (interaction.customId.startsWith('feedback:')) {
       const number = Number(interaction.customId.split(':')[1]);
       const record = store.getArchive(number);

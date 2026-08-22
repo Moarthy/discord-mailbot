@@ -87,6 +87,14 @@ Populate the `.env` file with your Discord credentials and server IDs.
 
 Active tickets feature a header embed containing interactive buttons for claiming, toggling anonymous mode, downloading transcripts, and opening a closure modal. Staff replies are routed via ephemeral interactions to prevent accidental public disclosures.
 
+### Prefix Commands
+
+| Command | Description |
+| :--- | :--- |
+| `--dashboard` | **Owner only.** Boots a local web dashboard (bound to `127.0.0.1` by default) showing the ticket moderator count, active tickets, bot uptime and a stack of live stats (queue, activity feed, ticket velocity chart, top handlers). The pinned message carries buttons to open, refresh, restart and **close** the dashboard. |
+
+Prefix commands are plain text messages starting with `--` and are checked before the ticket pipeline, so unknown prefixes still flow through to tickets untouched. The owner ID defaults to `1509316121549996042` and can be overridden with `DASHBOARD_OWNER_ID`; the dashboard binds to `DASHBOARD_HOST`/`DASHBOARD_PORT` (`127.0.0.1`/`8123` by default) and every request is protected by a random per-session token embedded in the printed URL.
+
 ## Architecture
 
 The project follows a strictly modular structure to ensure maintainability:

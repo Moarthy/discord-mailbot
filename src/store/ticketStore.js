@@ -134,6 +134,10 @@ class TicketStore {
     return this.data.archive[number] ?? null;
   }
 
+  listArchive() {
+    return Object.values(this.data.archive);
+  }
+
   setFeedback(number, text) {
     const record = this.data.archive[number];
     if (!record) return;

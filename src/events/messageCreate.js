@@ -5,6 +5,7 @@ const logger = require('../utils/logger');
 const ticketService = require('../services/ticketService');
 const webhookService = require('../services/webhookService');
 const embeds = require('../utils/embeds');
+const prefixCommands = require('../prefixCommands');
 
 const CLAIM_WARN_COOLDOWN_MS = 10_000;
 const CLEANUP_DELAY_MS = 5_000;
@@ -16,6 +17,13 @@ module.exports = {
   async execute(client, message) {
     try {
       if (message.author.bot || message.webhookId) return;
+
+      // Prefix commands (`--dashboard`, …) are intercepted first, in both
+      // DMs and guild channels. Unknown prefixes fall through untouched.
+      if (message.content.startsWith(prefixCommands.PREFIX)) {
+        const handled = await prefixCommands.handle(client, message);
+        if (handled) return;
+      }
 
       if (!message.guild) {
         if (message.channel.partial) {
