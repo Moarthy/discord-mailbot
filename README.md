@@ -9,7 +9,7 @@
 [![Release](https://img.shields.io/github/package-json/version/Moarthy/discord-mailbot?style=flat-square&label=Release&color=6C5CE7)](https://github.com/Moarthy/discord-mailbot)
 [![Last Commit](https://img.shields.io/github/last-commit/Moarthy/discord-mailbot?style=flat-square&label=Last%20Commit&color=007EC6)](https://github.com/Moarthy/discord-mailbot/commits/main)
 
-[Features](#features) • [Installation](#installation) • [Configuration](#configuration) • [Commands](#commands--interactions) • [Architecture](#architecture)
+[Features](#features) • [Installation](#installation) • [Web Dashboard](#web-dashboard) • [Configuration](#configuration) • [Commands](#commands--interactions) • [Architecture](#architecture)
 
 </div>
 
@@ -53,6 +53,48 @@ npm run deploy
 # Start the application
 npm start
 ```
+
+## Web Dashboard
+
+For a no-CLI experience, the bot ships with a local web dashboard. It lets you
+configure the bot and manage tickets entirely from your browser — no need to
+touch the `.env` file or Discord slash commands by hand.
+
+```bash
+# Start the bot and open the dashboard in your default browser
+npm run web
+# ... or equivalently:
+node src/index.js --web
+```
+
+Running with `--web` starts the bot *and* a local web server, then opens your
+default system browser to `http://localhost:3000` (Windows, macOS, Linux and
+[Termux](https://termux.dev/) are all supported — Termux uses `termux-open-url`
+or an Android intent). If a browser cannot be opened automatically, the URL is
+printed to the console.
+
+The dashboard provides:
+
+*   **Configuration** — edit every environment variable (`DISCORD_TOKEN`,
+    `CATEGORY_ID`, roles, channels, data file, etc.) in a form and save it to
+    `.env`. A restart button applies the changes.
+*   **Tickets** — view open tickets and their full message history, claim /
+    release tickets, toggle anonymous replies, reply to users, add internal
+    notes, download transcripts, and close tickets.
+*   **Blacklist** — block and unblock users with a reason.
+*   **Deploy** — deploy the slash commands to Discord with one click.
+
+The dashboard listens on `127.0.0.1` by default so only your own machine can
+reach it. If you change `WEB_HOST` to expose it on a network, add your own
+authentication first.
+
+### Dashboard options
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `WEB_HOST` | `127.0.0.1` | Interface the dashboard binds to. |
+| `WEB_PORT` | `3000` | Port the dashboard listens on. |
+| `WEB_OPEN_BROWSER` | `true` | Set to `false` to skip auto-opening a browser. |
 
 ## Configuration
 

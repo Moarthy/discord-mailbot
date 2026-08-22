@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "web": "node src/index.js --web",
     "deploy": "node src/deploy-commands.js"
   },
   "engines": { "node": ">=18.0.0" },

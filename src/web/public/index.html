@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discord Mailbot — Dashboard</title>
+<style>
+  :root {
+    --bg: #1e1f22;
+    --panel: #2b2d31;
+    --panel-2: #313338;
+    --border: #3f4147;
+    --text: #dbdee1;
+    --muted: #949ba4;
+    --brand: #5865f2;
+    --brand-hover: #4752c4;
+    --green: #57f287;
+    --red: #ed4245;
+    --yellow: #fee75c;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  a { color: #00a8fc; }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 22px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-wrap: wrap;
+  }
+  header .title { font-size: 17px; font-weight: 700; }
+  header .title .dot { color: var(--brand); }
+  .spacer { flex: 1; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .badge .pill { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .badge.online .pill { background: var(--green); }
+  .badge.offline .pill { background: var(--red); }
+
+  main { max-width: 1060px; margin: 0 auto; padding: 22px; }
+
+  .notice {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    background: #332b00;
+    border: 1px solid #6b5a00;
+    margin-bottom: 18px;
+  }
+  .notice a { color: var(--yellow); }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tabs button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tabs button:hover { color: var(--text); }
+  .tabs button.active { color: var(--text); border-bottom-color: var(--brand); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .card .num { font-size: 26px; font-weight: 700; }
+  .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .panel h2 { margin: 0 0 12px; font-size: 16px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--panel-2); }
+  tbody tr.selected { background: #383a40; }
+  .muted { color: var(--muted); }
+
+  button.btn {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.btn:hover { background: var(--brand-hover); }
+  button.btn:disabled { opacity: .5; cursor: not-allowed; }
+  button.btn.secondary { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); }
+  button.btn.secondary:hover { background: #3a3d42; }
+  button.btn.danger { background: var(--red); }
+  button.btn.danger:hover { background: #d83c3f; }
+  button.btn.small { padding: 5px 10px; font-size: 12px; }
+  button.btn.row { margin-right: 6px; margin-bottom: 6px; }
+
+  input[type="text"], input[type="password"], input[type="number"], textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--brand); }
+  textarea { resize: vertical; min-height: 70px; }
+  label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; }
+  .field { margin-bottom: 14px; }
+  .field .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+
+  .toast {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111214;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    max-width: 90vw;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  .toast.error { border-color: var(--red); }
+
+  .log { display: flex; flex-direction: column; gap: 8px; }
+  .msg {
+    background: var(--panel-2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    border-left: 4px solid var(--border);
+  }
+  .msg.user { border-left-color: var(--brand); }
+  .msg.staff, .msg.anon { border-left-color: var(--green); }
+  .msg.note { border-left-color: var(--yellow); background: #33301f; }
+  .msg.system { opacity: .75; font-style: italic; }
+  .msg .head { display: flex; gap: 8px; align-items: center; margin-bottom: 2px; }
+  .msg .who { font-weight: 600; }
+  .msg .when { color: var(--muted); font-size: 12px; }
+  .tag { background: var(--yellow); color: #1e1f22; border-radius: 4px; padding: 0 5px; font-size: 10px; font-weight: 700; }
+  .msg .body { white-space: pre-wrap; word-break: break-word; }
+  .msg .atts a { display: block; font-size: 12px; }
+
+  .detail-head { display: flex; gap: 16px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .detail-head img { width: 52px; height: 52px; border-radius: 50%; }
+  .detail-head .who { font-size: 17px; font-weight: 700; }
+  .kvs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .kv .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  .kv .v { font-size: 13px; }
+
+  .empty { color: var(--muted); text-align: center; padding: 26px 0; }
+  .actions-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="title"><span class="dot">📬</span> Discord Mailbot <span style="color:var(--muted);font-weight:400">· Dashboard</span></div>
+  <div class="spacer"></div>
+  <div class="badge offline" id="bot-badge"><span class="pill"></span><span id="bot-badge-text">Offline</span></div>
+  <div class="badge" id="bot-name" title="Bot account">—</div>
+  <label class="badge" style="gap:8px">
+    You are:
+    <select id="operator" style="width:auto;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:3px 6px;font-size:12px"></select>
+  </label>
+</header>
+
+<main>
+  <div class="notice" id="config-notice" style="display:none">
+    ⚠️ The bot is not fully configured. Open the <a href="#" data-tab="config">Configuration</a> tab to set your
+    <code>DISCORD_TOKEN</code> and <code>CATEGORY_ID</code>, then restart the bot.
+  </div>
+
+  <div class="tabs">
+    <button data-tab="overview" class="active">Overview</button>
+    <button data-tab="tickets">Tickets</button>
+    <button data-tab="blacklist">Blacklist</button>
+    <button data-tab="config">Configuration</button>
+  </div>
+
+  <!-- Overview -->
+  <section id="tab-overview">
+    <div class="grid" id="stats"></div>
+    <div class="panel">
+      <h2>Open tickets</h2>
+      <div id="overview-tickets"></div>
+    </div>
+  </section>
+
+  <!-- Tickets -->
+  <section id="tab-tickets" style="display:none">
+    <div class="panel">
+      <h2>Open tickets</h2>
+      <div id="tickets-list"></div>
+      <div id="ticket-detail" style="display:none"></div>
+    </div>
+    <div class="panel">
+      <h2>Archived tickets</h2>
+      <div id="archive-list"></div>
+    </div>
+  </section>
+
+  <!-- Blacklist -->
+  <section id="tab-blacklist" style="display:none">
+    <div class="panel">
+      <h2>Block a user</h2>
+      <div class="form-row">
+        <div class="field">
+          <label>User ID</label>
+          <input type="text" id="bl-user" placeholder="Discord user ID (e.g. 123456789012345678)">
+        </div>
+        <div class="field">
+          <label>Reason</label>
+          <input type="text" id="bl-reason" placeholder="Reason (optional)">
+        </div>
+      </div>
+      <button class="btn" id="bl-add">Block user</button>
+    </div>
+    <div class="panel">
+      <h2>Blacklisted users</h2>
+      <div id="blacklist-list"></div>
+    </div>
+  </section>
+
+  <!-- Configuration -->
+  <section id="tab-config" style="display:none">
+    <div class="panel">
+      <h2>Environment configuration</h2>
+      <p class="muted" style="margin-top:0">These values are saved to your <code>.env</code> file. You must restart the bot for changes to take effect.</p>
+      <div class="field">
+        <label>Discord bot token</label>
+        <input type="password" id="cfg-DISCORD_TOKEN" placeholder="Leave blank to keep the current token" autocomplete="off">
+        <div class="hint" id="cfg-token-hint"></div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Category ID *</label>
+          <input type="text" id="cfg-CATEGORY_ID" placeholder="Category where tickets are created">
+        </div>
+        <div class="field">
+          <label>Guild ID (optional)</label>
+          <input type="text" id="cfg-GUILD_ID" placeholder="Server ID for instant slash-command deployment">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Moderator role ID (optional)</label>
+          <input type="text" id="cfg-MODERATOR_ROLE_ID" placeholder="Role granting staff access">
+        </div>
+        <div class="field">
+          <label>Log channel ID (optional)</label>
+          <input type="text" id="cfg-LOG_CHANNEL_ID" placeholder="Channel for system logs">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Transcript channel ID (optional)</label>
+          <input type="text" id="cfg-TRANSCRIPT_CHANNEL_ID" placeholder="Channel for archived transcripts">
+        </div>
+        <div class="field">
+          <label>Data file (optional)</label>
+          <input type="text" id="cfg-DATA_FILE" placeholder="./data/tickets.json">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Web host (optional)</label>
+          <input type="text" id="cfg-WEB_HOST" placeholder="127.0.0.1">
+          <div class="hint">Keep <code>127.0.0.1</code> to only allow local access.</div>
+        </div>
+        <div class="field">
+          <label>Web port (optional)</label>
+          <input type="number" id="cfg-WEB_PORT" placeholder="3000">
+        </div>
+      </div>
+      <div class="actions-row">
+        <button class="btn" id="cfg-save">Save configuration</button>
+        <button class="btn secondary" id="cfg-deploy">Deploy slash commands</button>
+        <button class="btn danger" id="cfg-restart">Restart bot</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const state = { operatorId: localStorage.getItem('operatorId') || '' };
+
+  // ------------------------------------------------------------------ utils
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return isNaN(d) ? iso : d.toLocaleString();
+  }
+  function timeAgo(iso) {
+    if (!iso) return '';
+    const ms = Date.now() - new Date(iso).getTime();
+    const s = Math.floor(ms / 1000);
+    if (s < 60) return 'just now';
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + 'h ago';
+    return Math.floor(h / 24) + 'd ago';
+  }
+  function toast(message, isError) {
+    const el = $('toast');
+    el.textContent = message;
+    el.classList.toggle('error', Boolean(isError));
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3200);
+  }
+
+  async function api(path, options) {
+    const res = await fetch(path, options);
+    const data = await res.json().catch(() => ({}));
+    if (!data.ok) throw new Error(data.error || 'Request failed.');
+    return data.data;
+  }
+  function post(path, body) {
+    return api(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {})
+    });
+  }
+
+  // ------------------------------------------------------------------ tabs
+  document.querySelectorAll('.tabs button').forEach((btn) => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+  document.querySelectorAll('[data-tab]').forEach((el) => {
+    if (el.tagName === 'A') el.addEventListener('click', (e) => { e.preventDefault(); switchTab(el.dataset.tab); });
+  });
+  function switchTab(name) {
+    document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+    ['overview', 'tickets', 'blacklist', 'config'].forEach((t) => {
+      $('tab-' + t).style.display = t === name ? '' : 'none';
+    });
+    if (name === 'overview') refreshOverview();
+    if (name === 'tickets') { refreshTickets(); refreshArchive(); }
+    if (name === 'blacklist') refreshBlacklist();
+    if (name === 'config') refreshConfig();
+  }
+
+  // -------------------------------------------------------------- operator
+  const opSelect = $('operator');
+  opSelect.value = state.operatorId;
+  opSelect.addEventListener('change', () => {
+    state.operatorId = opSelect.value;
+    localStorage.setItem('operatorId', state.operatorId);
+  });
+
+  async function refreshOperators() {
+    try {
+      const ops = await api('/api/operators');
+      const prev = state.operatorId;
+      opSelect.innerHTML = '<option value="">Select yourself…</option>' +
+        ops.map((o) => `<option value="${esc(o.id)}">${esc(o.name)} (@${esc(o.username)})</option>`).join('');
+      if (prev && ops.some((o) => o.id === prev)) opSelect.value = prev;
+      else { state.operatorId = opSelect.value; localStorage.setItem('operatorId', opSelect.value || ''); }
+    } catch (e) {
+      opSelect.innerHTML = '<option value="">No staff found</option>';
+    }
+  }
+
+  // -------------------------------------------------------------- overview
+  async function refreshOverview() {
+    const st = await api('/api/status').catch(() => null);
+    if (st) {
+      $('bot-badge').classList.toggle('online', st.ready);
+      $('bot-badge').classList.toggle('offline', !st.ready);
+      $('bot-badge-text').textContent = st.ready ? 'Online' : 'Offline';
+      $('bot-name').textContent = st.botTag ? st.botTag : (st.ready ? '' : 'not connected');
+      $('config-notice').style.display = st.missingConfig ? '' : 'none';
+
+      $('stats').innerHTML = [
+        statCard(st.openTickets, 'Open tickets'),
+        statCard(st.archiveCount, 'Archived'),
+        statCard(st.blacklistCount, 'Blacklisted'),
+        statCard(st.categoryName || '—', 'Category', true)
+      ].join('');
+    }
+
+    try {
+      const tickets = await api('/api/tickets');
+      $('overview-tickets').innerHTML = ticketsTable(tickets, 'overview');
+      bindTicketRows(tickets, 'overview');
+    } catch (e) {
+      $('overview-tickets').innerHTML = '<div class="empty">Unable to load tickets — is the bot connected?</div>';
+    }
+  }
+  function statCard(num, label, small) {
+    return `<div class="card"><div class="num" style="${small ? 'font-size:19px' : ''}">${esc(num)}</div><div class="label">${esc(label)}</div></div>`;
+  }
+
+  function ticketsTable(tickets, scope) {
+    if (!tickets.length) return '<div class="empty">No open tickets.</div>';
+    return `<table><thead><tr>
+      <th>#</th><th>User</th><th>Claimed by</th><th>Anon</th><th>Messages</th><th>Opened</th><th></th>
+    </tr></thead><tbody>` +
+    tickets.map((t) => `<tr data-userid="${esc(t.userId)}" data-scope="${scope}">
+      <td>#${String(t.number).padStart(4, '0')}</td>
+      <td>${esc(t.userName)}</td>
+      <td>${t.claimedByName ? esc(t.claimedByName) : '<span class="muted">Unclaimed</span>'}</td>
+      <td>${t.anonymous ? 'ON' : 'OFF'}</td>
+      <td>${t.messageCount}</td>
+      <td class="muted">${timeAgo(t.createdAt)}</td>
+      <td><button class="btn small secondary" data-open="${esc(t.userId)}">Open</button></td>
+    </tr>`).join('') + '</tbody></table>';
+  }
+  function bindTicketRows(tickets, scope) {
+    const container = scope === 'overview' ? $('overview-tickets') : $('tickets-list');
+    container.querySelectorAll('tr').forEach((tr) => {
+      const uid = tr.dataset.userid;
+      tr.addEventListener('click', () => {
+        if (scope === 'overview') { switchTab('tickets'); }
+        selectTicket(uid);
+      });
+    });
+    container.querySelectorAll('[data-open]').forEach((b) => {
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        switchTab('tickets');
+        selectTicket(b.dataset.open);
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------- tickets
+  async function refreshTickets() {
+    try {
+      const tickets = await api('/api/tickets');
+      $('tickets-list').innerHTML = ticketsTable(tickets, 'tickets');
+      bindTicketRows(tickets, 'tickets');
+    } catch (e) {
+      $('tickets-list').innerHTML = '<div class="empty">Unable to load tickets — is the bot connected?</div>';
+    }
+  }
+
+  async function selectTicket(userId) {
+    try {
+      const t = await api('/api/tickets/' + encodeURIComponent(userId));
+      renderTicketDetail(t);
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  function renderTicketDetail(t) {
+    state.selectedTicket = t.userId;
+    const detail = $('ticket-detail');
+    detail.style.display = '';
+
+    const isClaimant = t.claimedBy === state.operatorId;
+
+    detail.innerHTML = `
+      <hr style="border:none;border-top:1px solid var(--border);margin:18px 0">
+      <div class="detail-head">
+        <img src="${esc(t.avatar)}" alt="" onerror="this.style.display='none'">
+        <div>
+          <div class="who">#${String(t.number).padStart(4, '0')} · ${esc(t.userName)}</div>
+          <div class="muted">${esc(t.userTag)} · opened ${fmtDate(t.createdAt)}</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="actions-row">
+          <button class="btn small" data-act="claim">${isClaimant ? 'Release' : 'Claim'}</button>
+          <button class="btn small secondary" data-act="anon">Anon: ${t.anonymous ? 'ON' : 'OFF'}</button>
+          <button class="btn small secondary" data-act="transcript">Transcript</button>
+          <button class="btn small danger" data-act="close">Close</button>
+        </div>
+      </div>
+      <div class="kvs">
+        <div class="kv"><div class="k">Status</div><div class="v">${t.claimedByName ? 'Claimed by ' + esc(t.claimedByName) : 'Unclaimed'}</div></div>
+        <div class="kv"><div class="k">Anonymous</div><div class="v">${t.anonymous ? 'ON' : 'OFF'}</div></div>
+        <div class="kv"><div class="k">Account created</div><div class="v">${fmtDate(t.accountCreated)}</div></div>
+        <div class="kv"><div class="k">Messages</div><div class="v">${t.log.length}</div></div>
+      </div>
+      <div class="field">
+        <label>Reply to user</label>
+        <textarea id="reply-text" placeholder="Type a reply… (only the claimant can reply)"></textarea>
+        <div class="actions-row">
+          <button class="btn small" data-act="reply">Send reply</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Add internal note</label>
+        <div class="form-row">
+          <textarea id="note-text" placeholder="Note visible to staff only…"></textarea>
+          <div class="actions-row"><button class="btn small secondary" data-act="note">Add note</button></div>
+        </div>
+      </div>
+      <h3 style="font-size:14px;color:var(--muted);margin:14px 0 8px">Message log</h3>
+      <div class="log">${t.log.map(logEntry).join('') || '<div class="empty">No messages yet.</div>'}</div>
+    `;
+
+    detail.querySelectorAll('[data-act]').forEach((btn) => {
+      btn.addEventListener('click', () => handleAction(btn.dataset.act, t));
+    });
+  }
+
+  function logEntry(e) {
+    const type = e.type || 'system';
+    const labels = { user: 'user', staff: 'staff', anon: 'staff', note: 'internal', system: 'system', feedback: 'feedback' };
+    const atts = (e.attachments || []).map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.split('/').pop())}</a>`).join('');
+    return `<div class="msg ${esc(type)}">
+      <div class="head">
+        <span class="who">${esc(e.authorName || 'System')}</span>
+        <span class="tag">${labels[type] || type}</span>
+        <span class="when">${fmtDate(e.t)}</span>
+      </div>
+      ${e.content ? `<div class="body">${esc(e.content)}</div>` : ''}
+      ${atts ? `<div class="atts">${atts}</div>` : ''}
+    </div>`;
+  }
+
+  async function handleAction(action, t) {
+    const uid = t.userId;
+    const oid = state.operatorId;
+    try {
+      if (action === 'claim') {
+        const r = await post('/api/claim', { userId: uid, operatorId: oid });
+        toast(r.released ? 'Ticket released.' : 'Ticket claimed.');
+      } else if (action === 'anon') {
+        const r = await post('/api/anon', { userId: uid, operatorId: oid });
+        toast('Anonymous replies ' + (r.anonymous ? 'ON' : 'OFF') + '.');
+      } else if (action === 'transcript') {
+        window.open('/api/transcript?userId=' + encodeURIComponent(uid) + '&notes=1', '_blank');
+        return;
+      } else if (action === 'note') {
+        const text = $('note-text').value.trim();
+        if (!text) { toast('Note cannot be empty.', true); return; }
+        await post('/api/note', { userId: uid, operatorId: oid, text });
+        toast('Note added.');
+      } else if (action === 'reply') {
+        const text = $('reply-text').value.trim();
+        if (!text) { toast('Reply cannot be empty.', true); return; }
+        await post('/api/reply', { userId: uid, operatorId: oid, text });
+        toast('Reply sent.');
+        $('reply-text').value = '';
+      } else if (action === 'close') {
+        const reason = prompt('Close reason (optional):') || '';
+        await post('/api/close', { userId: uid, operatorId: oid, reason });
+        toast('Ticket closed.');
+        $('ticket-detail').style.display = 'none';
+        refreshOverview();
+        refreshTickets();
+        refreshArchive();
+        return;
+      }
+      await selectTicket(uid);
+      refreshOverview();
+      refreshTickets();
+      refreshArchive();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
+  async function refreshArchive() {
+    try {
+      const archive = await api('/api/archive');
+      if (!archive.length) { $('archive-list').innerHTML = '<div class="empty">No archived tickets.</div>'; return; }
+      $('archive-list').innerHTML = `<table><thead><tr>
+        <th>#</th><th>User</th><th>Closed</th><th>Reason</th><th>Feedback</th><th></th>
+      </tr></thead><tbody>` +
+      archive.map((a) => `<tr>
+        <td>#${String(a.number).padStart(4, '0')}</td>
+        <td>${esc(a.userId)}</td>
+        <td class="muted">${fmtDate(a.closedAt)}</td>
+        <td>${esc(a.reason || '—')}</td>
+        <td>${a.feedback ? esc(a.feedback.slice(0, 60)) : '<span class="muted">—</span>'}</td>
+        <td>
+          <button class="btn small secondary" data-anum="${a.number}" data-notes="0">User</button>
+          <button class="btn small secondary" data-anum="${a.number}" data-notes="1">Staff</button>
+        </td>
+      </tr>`).join('') + '</tbody></table>';
+      $('archive-list').querySelectorAll('[data-anum]').forEach((b) => {
+        b.addEventListener('click', () => {
+          window.open('/api/archive-transcript?number=' + b.dataset.anum + '&notes=' + b.dataset.notes, '_blank');
+        });
+      });
+    } catch (e) {
+      $('archive-list').innerHTML = '<div class="empty">Unable to load archive.</div>';
+    }
+  }
+
+  // -------------------------------------------------------------- blacklist
+  async function refreshBlacklist() {
+    try {
+      const list = await api('/api/blacklist');
+      if (!list.length) { $('blacklist-list').innerHTML = '<div class="empty">No users are blacklisted.</div>'; return; }
+      $('blacklist-list').innerHTML = `<table><thead><tr>
+        <th>User ID</th><th>Reason</th><th>Blocked by</th><th>Date</th><th></th>
+      </tr></thead><tbody>` +
+      list.map((e) => `<tr>
+        <td><code>${esc(e.userId)}</code></td>
+        <td>${esc(e.reason)}</td>
+        <td>${esc(e.byId || '—')}</td>
+        <td class="muted">${fmtDate(e.at)}</td>
+        <td><button class="btn small secondary" data-unblock="${esc(e.userId)}">Unblock</button></td>
+      </tr>`).join('') + '</tbody></table>';
+      $('blacklist-list').querySelectorAll('[data-unblock]').forEach((b) => {
+        b.addEventListener('click', async () => {
+          try {
+            await post('/api/blacklist/remove', { userId: b.dataset.unblock, operatorId: state.operatorId });
+            toast('User unblocked.');
+            refreshBlacklist();
+            refreshOverview();
+          } catch (e) { toast(e.message, true); }
+        });
+      });
+    } catch (e) {
+      $('blacklist-list').innerHTML = '<div class="empty">Unable to load blacklist.</div>';
+    }
+  }
+
+  $('bl-add').addEventListener('click', async () => {
+    const userId = $('bl-user').value.trim();
+    const reason = $('bl-reason').value.trim();
+    if (!userId) { toast('Enter a user ID.', true); return; }
+    try {
+      await post('/api/blacklist/add', { userId, reason, operatorId: state.operatorId });
+      toast('User blacklisted.');
+      $('bl-user').value = '';
+      $('bl-reason').value = '';
+      refreshBlacklist();
+      refreshOverview();
+    } catch (e) { toast(e.message, true); }
+  });
+
+  // ----------------------------------------------------------------- config
+  const CFG_FIELDS = ['DISCORD_TOKEN','CATEGORY_ID','GUILD_ID','MODERATOR_ROLE_ID','LOG_CHANNEL_ID','TRANSCRIPT_CHANNEL_ID','DATA_FILE','WEB_HOST','WEB_PORT'];
+
+  async function refreshConfig() {
+    try {
+      const cfg = await api('/api/config');
+      for (const key of CFG_FIELDS) {
+        const el = $('cfg-' + key);
+        if (el) el.value = cfg.values[key] || '';
+      }
+      $('cfg-token-hint').textContent = cfg.tokenSet ? 'A token is currently set — leave blank to keep it.' : 'No token set yet.';
+    } catch (e) { toast(e.message, true); }
+  }
+
+  $('cfg-save').addEventListener('click', async () => {
+    const values = {};
+    for (const key of CFG_FIELDS) values[key] = $('cfg-' + key).value;
+    try {
+      await post('/api/config', { values });
+      toast('Configuration saved. Restart the bot to apply changes.');
+      refreshConfig();
+    } catch (e) { toast(e.message, true); }
+  });
+
+  $('cfg-deploy').addEventListener('click', async () => {
+    const btn = $('cfg-deploy');
+    btn.disabled = true;
+    try {
+      const r = await post('/api/deploy');
+      toast(`Deployed ${r.count} slash commands (${r.scope}${r.scope === 'global' ? ', may take up to 1h' : ''}).`);
+    } catch (e) { toast(e.message, true); }
+    finally { btn.disabled = false; }
+  });
+
+  $('cfg-restart').addEventListener('click', async () => {
+    if (!confirm('Restart the bot? The dashboard will briefly disconnect.')) return;
+    toast('Restarting…');
+    try {
+      await post('/api/restart');
+    } catch (e) { /* process is exiting */ }
+    setTimeout(() => location.reload(), 1500);
+    setTimeout(() => location.reload(), 5000);
+  });
+
+  // ------------------------------------------------------------------- init
+  async function init() {
+    await refreshOperators();
+    await refreshOverview();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
