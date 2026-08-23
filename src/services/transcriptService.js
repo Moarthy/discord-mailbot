@@ -88,7 +88,7 @@ function toAttachment(ticket, includeNotes) {
 // so the JSON store only keeps lightweight metadata.
 function writeArchives(ticket) {
   try {
-    const dir = path.join(path.dirname(config.dataFile), 'transcripts');
+    const dir = path.join(config.dataDir, 'transcripts');
     fs.mkdirSync(dir, { recursive: true });
 
     const label = String(ticket.number).padStart(4, '0');

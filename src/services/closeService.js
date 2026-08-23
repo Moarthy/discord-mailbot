@@ -43,6 +43,7 @@ async function executeClose(interaction, reason = '') {
   });
 
   const finalTicket = store.getByUserId(ticket.userId);
+  store.updateTicket(ticket.userId, { closedAt: new Date().toISOString() });
   const transcripts = transcriptService.writeArchives(finalTicket);
 
   const user = await client.users.fetch(ticket.userId).catch(() => null);

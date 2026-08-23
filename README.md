@@ -17,7 +17,7 @@
 
 ## Overview
 
-Discord Mailbot is a lightweight, feature-rich ModMail system built on Discord.js v14. Designed for community support teams, it facilitates seamless communication between server staff and users via direct messages. The system utilizes webhooks, interactive modals, and persistent JSON storage, eliminating the need for external databases while providing a robust moderation environment.
+Discord Mailbot is a lightweight, feature-rich ModMail system built on Discord.js v14. Designed for community support teams, it facilitates seamless communication between server staff and users via direct messages. The system utilizes webhooks, interactive modals, and persistent SQLite storage (Node's built-in `node:sqlite` — zero extra dependencies), providing a robust moderation environment.
 
 ## Features
 
@@ -32,9 +32,9 @@ Discord Mailbot is a lightweight, feature-rich ModMail system built on Discord.j
 ## Installation
 
 **Prerequisites:**
-*   Node.js v18.0.0 or higher
+*   Node.js v22.13.0 or higher (built-in `node:sqlite` support)
 *   npm or yarn
-*   A Discord Bot Application with **Message Content**, **Server Members**, and **Presence** intents enabled.
+*   A Discord Bot Application with **Message Content** and **Server Members** intents enabled.
 
 ```bash
 # Clone the repository
@@ -66,9 +66,14 @@ Populate the `.env` file with your Discord credentials and server IDs.
 | `MODERATOR_ROLE_ID` | Optional | Role ID granting staff access to tickets and management commands. |
 | `LOG_CHANNEL_ID` | Optional | Channel ID for system logs, alerts, and closure feedback. |
 | `TRANSCRIPT_CHANNEL_ID` | Optional | Channel ID for automatically archiving generated transcripts. |
-| `DATA_FILE` | Optional | Path to the JSON database file. Defaults to `./data/tickets.json`. |
+| `DB_FILE` | Optional | Path to the SQLite database file. Defaults to `./data/mailbot.db`. |
+| `DATA_FILE` | Optional | Legacy `tickets.json` location. Used only to anchor the data directory (transcripts) and for one-time migration into SQLite. Defaults to `./data/tickets.json`. |
 
 *Note: The bot requires `Manage Channels`, `Manage Webhooks`, `Manage Roles`, `Manage Messages`, and `Send Messages` permissions in the target category.*
+
+### Storage
+
+Ticket data lives in a single SQLite database (`data/mailbot.db`) using WAL journaling and transactional writes — no external database server required. An existing `tickets.json` is imported automatically on first start and renamed to `tickets.json.imported-<timestamp>` as a backup. HTML transcripts are written to `data/transcripts/` when a ticket closes.
 
 ## Commands & Interactions
 
@@ -95,7 +100,7 @@ The project follows a strictly modular structure to ensure maintainability:
 *   **`src/events/`**: Discord Gateway event listeners mapped to specific actions.
 *   **`src/commands/`**: Self-contained Slash Command modules.
 *   **`src/interactions/`**: Handlers for complex UI interactions (buttons and modals).
-*   **`src/store/`**: Singleton JSON persistence manager with atomic file writes and backfill support.
+*   **`src/store/`**: Singleton SQLite persistence layer (built-in `node:sqlite`, WAL mode, transactional closures) with one-time legacy JSON import.
 
 ## Contributing
 

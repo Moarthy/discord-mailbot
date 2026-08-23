@@ -45,6 +45,9 @@ module.exports = {
       });
     }
 
-    return null;
+    return interaction.reply({
+      content: 'Unknown or expired interaction.',
+      flags: MessageFlags.Ephemeral
+    }).catch(() => {});
   }
 };

@@ -8,7 +8,7 @@
     "start": "node src/index.js",
     "deploy": "node src/deploy-commands.js"
   },
-  "engines": { "node": ">=18.0.0" },
+  "engines": { "node": ">=22.13.0" },
   "dependencies": {
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5"

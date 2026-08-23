@@ -107,6 +107,6 @@ module.exports = {
       return interaction.showModal(buildCloseModal());
     }
 
-    return null;
+    return interaction.reply({ content: 'Unknown or expired interaction.', ...EPHEMERAL }).catch(() => {});
   }
 };

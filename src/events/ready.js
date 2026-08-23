@@ -79,6 +79,20 @@ async function reconcile(client, category) {
     }
   }
 
+  const pendingDeletion = guild.channels.cache.filter(
+    (channel) =>
+      channel.parentId === category.id &&
+      channel.type === ChannelType.GuildText &&
+      typeof channel.topic === 'string' &&
+      /^Closed ticket #\d{4,} - pending deletion/.test(channel.topic)
+  );
+
+  for (const channel of pendingDeletion.values()) {
+    if (store.getByChannelId(channel.id)) continue;
+    logger.warn(`Deleting leftover pending-deletion channel #${channel.name}.`);
+    await channel.delete('Leftover closed ModMail ticket.').catch(() => {});
+  }
+
   for (const ticket of store.getOpenTickets()) {
     const cachedChannel = guild.channels.cache.get(ticket.channelId);
     if (!cachedChannel || cachedChannel.parentId !== category.id) {

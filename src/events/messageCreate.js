@@ -109,7 +109,7 @@ async function handleGuildMessage(client, message) {
       if (message.content) lines.push(message.content);
       lines.push(...attachmentUrls);
 
-      await user.send({ content: lines.join('\n') }).catch(() => {});
+      await user.send({ content: lines.join('\n'), allowedMentions: { parse: [] } }).catch(() => {});
     } else {
       // Text-only: use the embed as before (author line stripped when anonymous).
       const iconURL = anonymous ? message.guild.iconURL() : message.author.displayAvatarURL({ size: 256 });

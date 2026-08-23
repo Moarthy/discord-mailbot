@@ -1,20 +1,28 @@
 require('dotenv').config();
 
-const { Client, REST, Routes, Events } = require('discord.js');
+const { REST, Routes } = require('discord.js');
 
 const config = require('./config');
 const commands = require('./commands');
 const logger = require('./utils/logger');
 
-const body = Object.values(commands).map((command) => command.data.toJSON());
+function applicationIdFromToken(token) {
+  const raw = Buffer.from(token.replace(/^Bot\s*/i, '').split('.')[0], 'base64').toString('utf8');
+  return /^\d{15,21}$/.test(raw) ? raw : null;
+}
 
-const client = new Client({ intents: [] });
+async function main() {
+  const appId = applicationIdFromToken(config.token);
+  if (!appId) {
+    logger.error('Could not derive the application ID from DISCORD_TOKEN; token looks malformed.');
+    process.exitCode = 1;
+    return;
+  }
 
-client.once(Events.ClientReady, async () => {
+  const body = Object.values(commands).map((command) => command.data.toJSON());
+  const rest = new REST({ version: '10' }).setToken(config.token);
+
   try {
-    const rest = new REST({ version: '10' }).setToken(config.token);
-    const appId = client.application.id;
-
     if (config.guildId) {
       await rest.put(Routes.applicationGuildCommands(appId, config.guildId), { body });
       logger.info(`Deployed ${body.length} guild slash commands.`);
@@ -25,9 +33,7 @@ client.once(Events.ClientReady, async () => {
   } catch (error) {
     logger.error('Failed to deploy commands.', error);
     process.exitCode = 1;
-  } finally {
-    await client.destroy();
   }
-});
+}
 
-client.login(config.token);
+main();
