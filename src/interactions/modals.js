@@ -34,13 +34,22 @@ module.exports = {
       await logService.send(
         interaction.client,
         embeds.systemEmbed(
-          `⭐ New feedback on ticket ${embeds.ticketNumberLabel(number)}:\n> ${text.slice(0, 500)}`,
+          `New feedback on ticket ${embeds.ticketNumberLabel(number)}:\n> ${text.slice(0, 500)}`,
           embeds.Colors.feedback
         )
       );
 
+      // Keep the close summary above the thanks line instead of overwriting
+      // the whole message with it.
       return interaction.update({
-        embeds: [embeds.feedbackThanksEmbed(record)],
+        embeds: [
+          embeds.closeEmbed({
+            ticket: record,
+            reason: record.reason,
+            closedByTag: record.closedBy ? `<@${record.closedBy}>` : undefined
+          }),
+          embeds.feedbackThanksEmbed(record)
+        ],
         components: []
       });
     }

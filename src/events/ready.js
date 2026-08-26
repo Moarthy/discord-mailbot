@@ -97,7 +97,11 @@ async function reconcile(client, category) {
     const cachedChannel = guild.channels.cache.get(ticket.channelId);
     if (!cachedChannel || cachedChannel.parentId !== category.id) {
       logger.warn(`Archiving ticket #${ticket.number} whose channel no longer exists or was moved out of the ModMail category.`);
-      store.closeTicket(ticket.userId, { closedBy: null, reason: 'Channel missing at startup.' });
+      await notifyService.archiveDeletedTicket(client, ticket, {
+        reason: 'Channel missing at startup.',
+        // Moved-out channels are still alive; only truly gone channels warrant a user notice.
+        silent: Boolean(cachedChannel)
+      });
       continue;
     }
 

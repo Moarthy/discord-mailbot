@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(DISCORD_TOKEN=smoke-test-token CATEGORY_ID=123456789012345678 DATA_FILE=/tmp/mailbot-smoke/tickets.json node *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(DISCORD_TOKEN=x CATEGORY_ID=1 DATA_FILE=/tmp/mailbot-smoke/tickets.json node smoke.js)",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(node *)"
+    ]
+  }
+}

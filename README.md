@@ -27,6 +27,7 @@ Discord Mailbot is a lightweight, feature-rich ModMail system built on Discord.j
 *   **HTML Transcripts:** Generates responsive, color-coded HTML transcripts upon ticket closure, distinguishing between user messages, staff replies, and private internal notes.
 *   **Typing Indicators:** Synchronizes typing states between user DMs and staff channels to provide a real-time conversational experience.
 *   **State Reconciliation:** Automatically cleans up orphaned channels and recovers ticket states during bot restarts or unexpected downtime.
+*   **Deletion Awareness:** If a ticket channel is deleted by hand instead of closed properly, the owner receives a clear "Your ticket has been deleted" notice — including their transcript — and the record is archived with an audit-trail entry.
 *   **Blacklist Management:** Blocks abusive users from opening new tickets with persistent, file-based enforcement.
 
 ## Installation

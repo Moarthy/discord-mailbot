@@ -4,6 +4,7 @@ const config = require('../config');
 const store = require('../store/ticketStore');
 const logger = require('../utils/logger');
 const webhookService = require('./webhookService');
+const notifyService = require('./notifyService');
 const embeds = require('../utils/embeds');
 const { sanitizeChannelName } = require('../utils/text');
 
@@ -189,6 +190,7 @@ async function createOrResolveTicket(client, user) {
 
     return { channel, webhook, created: true, ticket };
   } catch (error) {
+    notifyService.markBotSideDeletion(channel.id);
     await channel.delete('Failed to initialize ModMail ticket.').catch(() => {});
     throw error;
   }

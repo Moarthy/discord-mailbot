@@ -72,7 +72,7 @@ async function executeClose(interaction, reason = '') {
 
   await logService.send(
     client,
-    embeds.systemEmbed(`🔒 Ticket ${embeds.ticketNumberLabel(ticket.number)} closed by ${interaction.user.tag}.`, embeds.Colors.danger)
+    embeds.systemEmbed(`Ticket ${embeds.ticketNumberLabel(ticket.number)} closed by ${interaction.user.tag}.`, embeds.Colors.danger)
   );
 
   store.closeTicket(ticket.userId, {

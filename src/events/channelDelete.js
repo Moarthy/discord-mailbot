@@ -1,5 +1,5 @@
 const store = require('../store/ticketStore');
-const embeds = require('../utils/embeds');
+const notifyService = require('../services/notifyService');
 const logger = require('../utils/logger');
 
 module.exports = {
@@ -9,16 +9,12 @@ module.exports = {
       const ticket = store.getByChannelId(channel.id);
       if (!ticket) return;
 
-      const user = await client.users.fetch(ticket.userId).catch(() => null);
-
-      if (user) {
-        await user.send({
-          embeds: [embeds.closeEmbed({ ticket, reason: 'Your ticket was closed by staff.', closedByTag: 'Staff' })]
-        }).catch(() => {});
-      }
-
-      store.closeTicket(ticket.userId, { closedBy: null, reason: 'Channel manually deleted.' });
-      logger.info(`Archived ticket #${ticket.number} after manual channel deletion.`);
+      // Deletions the bot performed itself (setup rollback) are archived
+      // silently; anything else means staff removed the channel by hand.
+      await notifyService.archiveDeletedTicket(client, ticket, {
+        reason: 'Channel manually deleted.',
+        silent: notifyService.wasBotSideDeletion(channel.id)
+      });
     } catch (error) {
       logger.error('Failed to clean ticket data after channel delete.', error);
     }

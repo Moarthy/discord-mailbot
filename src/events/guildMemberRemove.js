@@ -28,7 +28,7 @@ module.exports = {
         await logService.send(
           client,
           embeds.systemEmbed(
-            `🎫 Claim released on ticket ${embeds.ticketNumberLabel(ticket.number)} (claimant left the server).`
+            `Claim released on ticket ${embeds.ticketNumberLabel(ticket.number)} (claimant left the server).`
           )
         );
       }

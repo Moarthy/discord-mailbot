@@ -122,7 +122,7 @@ function closeEmbed({ ticket, reason, closedByTag }) {
   return new EmbedBuilder()
     .setColor(Colors.danger)
     .setTitle(`Ticket ${ticketNumberLabel(ticket.number)} closed`)
-    .setDescription('Thank you for contacting staff. Your transcript is attached below.')
+    .setDescription('Your transcript is attached below.')
     .addFields(
       { name: 'Closed by', value: closedByTag || 'Staff', inline: true },
       { name: 'Duration', value: duration, inline: true },
@@ -131,13 +131,27 @@ function closeEmbed({ ticket, reason, closedByTag }) {
     .setTimestamp();
 }
 
+// Deliberately bare: the user needs to know the ticket is gone, that their
+// transcript survived, and how to reach staff again — nothing more.
+function ticketDeletedEmbed({ ticket }) {
+  return new EmbedBuilder()
+    .setColor(Colors.danger)
+    .setTitle('Your ticket has been deleted')
+    .setDescription(
+      'The channel was removed before the ticket could be closed normally.\n' +
+      'Your transcript is attached — DM me anytime to start a new one.'
+    )
+    .setFooter({ text: `Ticket ${ticketNumberLabel(ticket.number)}` })
+    .setTimestamp();
+}
+
 function claimantLeftEmbed({ ticket, leaverName }) {
   return new EmbedBuilder()
     .setColor(Colors.warning)
-    .setTitle('🔄 Handler update')
+    .setTitle('Handler update')
     .setDescription(
-      `**${leaverName}** left the server, so your ticket is back in the queue.\n` +
-      'Your messages still reach staff — hang tight, someone will pick up soon.'
+      `**${leaverName}** left the server, so your ticket is back in the queue.` +
+      ' Your messages still reach staff — hang tight.'
     )
     .setFooter({ text: `Ticket ${ticketNumberLabel(ticket.number)}` })
     .setTimestamp();
@@ -146,7 +160,7 @@ function claimantLeftEmbed({ ticket, leaverName }) {
 function claimReleasedEmbed({ ticket, leaverName }) {
   return new EmbedBuilder()
     .setColor(Colors.warning)
-    .setDescription(`🎫 **${leaverName}** left the server — claim released. Up for grabs: \`/claim\`.`)
+    .setDescription(`**${leaverName}** left the server — claim released. Up for grabs: \`/claim\`.`)
     .setTimestamp();
 }
 
@@ -164,20 +178,15 @@ function feedbackButton(ticket) {
 function feedbackPromptEmbed(ticket) {
   return new EmbedBuilder()
     .setColor(Colors.feedback)
-    .setTitle("⭐ We'd love your feedback")
-    .setDescription(
-      `How was your support on ticket ${ticketNumberLabel(ticket.number)}?\n` +
-      'Tap the button below to leave a short comment. Your words go directly to the staff team.'
-    );
+    .setDescription(`How was your support on ticket ${ticketNumberLabel(ticket.number)}? Leave a comment below if you like.`)
+    .setTimestamp();
 }
 
 function feedbackThanksEmbed(ticket) {
   return new EmbedBuilder()
     .setColor(Colors.success)
-    .setTitle('⭐ Thanks for your feedback!')
-    .setDescription(
-      `Your comment on ticket ${ticketNumberLabel(ticket.number)} has been recorded and shared with the staff team.`
-    );
+    .setDescription('Thanks — your feedback has been recorded.')
+    .setTimestamp();
 }
 
 function refusedEmbed(entry) {
@@ -202,6 +211,7 @@ module.exports = {
   systemEmbed,
   errorEmbed,
   closeEmbed,
+  ticketDeletedEmbed,
   claimantLeftEmbed,
   claimReleasedEmbed,
   feedbackButton,
