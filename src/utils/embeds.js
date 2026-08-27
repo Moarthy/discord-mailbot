@@ -1,6 +1,17 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 const { formatRelative, durationHuman } = require('./time');
+const { truncate } = require('./text');
+
+// Discord's hard embed limits. Exceeding any of them makes EmbedBuilder throw
+// at construction time, which previously took down whole interactions.
+const Limits = {
+  description: 4096,
+  fieldValue: 1024,
+  footer: 2048,
+  authorName: 256,
+  title: 256
+};
 
 const Colors = {
   brand: 0x5865f2,
@@ -88,10 +99,10 @@ function claimLockedEmbed(ticket) {
 // In anonymous mode the author line (name + icon) is removed entirely.
 function staffReplyEmbed({ senderName, iconURL, content, anonymous = false }) {
   const embed = new EmbedBuilder()
-    .setDescription(content || '*Attachments only*');
+    .setDescription(truncate(content || '*Attachments only*', Limits.description));
 
   if (!anonymous) {
-    embed.setAuthor({ name: `Staff · ${senderName}`, iconURL: iconURL ?? null });
+    embed.setAuthor({ name: truncate(`Staff · ${senderName}`, Limits.authorName), iconURL: iconURL ?? null });
   }
 
   return embed;
@@ -100,18 +111,18 @@ function staffReplyEmbed({ senderName, iconURL, content, anonymous = false }) {
 function noteEmbed(authorName, text, ticket) {
   return new EmbedBuilder()
     .setColor(Colors.note)
-    .setAuthor({ name: `Internal note · ${authorName}` })
-    .setDescription(text)
+    .setAuthor({ name: truncate(`Internal note · ${authorName}`, Limits.authorName) })
+    .setDescription(truncate(text, Limits.description))
     .setFooter({ text: `Ticket ${ticketNumberLabel(ticket.number)} · never sent to the user` })
     .setTimestamp();
 }
 
 function systemEmbed(text, color = Colors.system) {
-  return new EmbedBuilder().setColor(color).setDescription(text).setTimestamp();
+  return new EmbedBuilder().setColor(color).setDescription(truncate(text, Limits.description)).setTimestamp();
 }
 
 function errorEmbed(text) {
-  return new EmbedBuilder().setColor(Colors.danger).setDescription(`⛔ ${text}`);
+  return new EmbedBuilder().setColor(Colors.danger).setDescription(truncate(`⛔ ${text}`, Limits.description));
 }
 
 function closeEmbed({ ticket, reason, closedByTag }) {
@@ -124,9 +135,9 @@ function closeEmbed({ ticket, reason, closedByTag }) {
     .setTitle(`Ticket ${ticketNumberLabel(ticket.number)} closed`)
     .setDescription('Your transcript is attached below.')
     .addFields(
-      { name: 'Closed by', value: closedByTag || 'Staff', inline: true },
+      { name: 'Closed by', value: truncate(closedByTag || 'Staff', Limits.fieldValue), inline: true },
       { name: 'Duration', value: duration, inline: true },
-      { name: 'Reason', value: reason || '—' }
+      { name: 'Reason', value: truncate(reason || '—', Limits.fieldValue) }
     )
     .setTimestamp();
 }
@@ -150,8 +161,11 @@ function claimantLeftEmbed({ ticket, leaverName }) {
     .setColor(Colors.warning)
     .setTitle('Handler update')
     .setDescription(
-      `**${leaverName}** left the server, so your ticket is back in the queue.` +
-      ' Your messages still reach staff — hang tight.'
+      truncate(
+        `**${leaverName}** left the server, so your ticket is back in the queue.` +
+        ' Your messages still reach staff — hang tight.',
+        Limits.description
+      )
     )
     .setFooter({ text: `Ticket ${ticketNumberLabel(ticket.number)}` })
     .setTimestamp();
@@ -160,7 +174,9 @@ function claimantLeftEmbed({ ticket, leaverName }) {
 function claimReleasedEmbed({ ticket, leaverName }) {
   return new EmbedBuilder()
     .setColor(Colors.warning)
-    .setDescription(`**${leaverName}** left the server — claim released. Up for grabs: \`/claim\`.`)
+    .setDescription(
+      truncate(`**${leaverName}** left the server — claim released. Up for grabs: \`/claim\`.`, Limits.description)
+    )
     .setTimestamp();
 }
 
@@ -194,13 +210,14 @@ function refusedEmbed(entry) {
     .setColor(Colors.danger)
     .setTitle('Contact blocked')
     .setDescription('You are currently blocked from contacting staff.')
-    .addFields({ name: 'Reason', value: entry.reason || '—' })
+    .addFields({ name: 'Reason', value: truncate(entry.reason || '—', Limits.fieldValue) })
     .setFooter({ text: 'If you believe this is a mistake, contact the server team elsewhere.' })
     .setTimestamp();
 }
 
 module.exports = {
   Colors,
+  Limits,
   ticketNumberLabel,
   headerEmbed,
   headerButtons,

@@ -19,7 +19,10 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers
+    GatewayIntentBits.GuildMembers,
+    // Without this the typingStart listener never fires and the documented
+    // DM typing-indicator relay is silently dead.
+    GatewayIntentBits.DirectMessageTyping
   ],
   partials: [Partials.Channel]
 });

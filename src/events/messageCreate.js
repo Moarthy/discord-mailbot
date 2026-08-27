@@ -5,6 +5,7 @@ const logger = require('../utils/logger');
 const ticketService = require('../services/ticketService');
 const webhookService = require('../services/webhookService');
 const embeds = require('../utils/embeds');
+const { splitMessage } = require('../utils/text');
 
 const CLAIM_WARN_COOLDOWN_MS = 10_000;
 const CLEANUP_DELAY_MS = 5_000;
@@ -109,7 +110,11 @@ async function handleGuildMessage(client, message) {
       if (message.content) lines.push(message.content);
       lines.push(...attachmentUrls);
 
-      await user.send({ content: lines.join('\n'), allowedMentions: { parse: [] } }).catch(() => {});
+      // A DM caps at 2000 characters; without splitting, long replies were
+      // rejected by Discord and silently dropped by the .catch() below.
+      for (const chunk of splitMessage(lines.join('\n'), 1900)) {
+        await user.send({ content: chunk, allowedMentions: { parse: [] } }).catch(() => {});
+      }
     } else {
       // Text-only: use the embed as before (author line stripped when anonymous).
       const iconURL = anonymous ? message.guild.iconURL() : message.author.displayAvatarURL({ size: 256 });

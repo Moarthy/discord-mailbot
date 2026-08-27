@@ -47,6 +47,17 @@ function splitMessage(text, maxLength = 2000) {
   return chunks;
 }
 
+// Clamps text to a hard character budget, leaving a visible ellipsis so
+// truncation is never silent. Discord rejects the whole payload when any
+// embed field exceeds its limit, so every user-supplied string that reaches
+// an embed must pass through here.
+function truncate(value, maxLength) {
+  const text = String(value ?? '');
+  if (text.length <= maxLength) return text;
+  if (maxLength <= 1) return text.slice(0, maxLength);
+  return `${text.slice(0, maxLength - 1)}…`;
+}
+
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
     '&': '&amp;',
@@ -57,4 +68,4 @@ function escapeHtml(value) {
   }[char]));
 }
 
-module.exports = { sanitizeChannelName, splitMessage, escapeHtml };
+module.exports = { sanitizeChannelName, splitMessage, truncate, escapeHtml };
