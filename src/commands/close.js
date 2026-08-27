@@ -6,7 +6,11 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('close')
     .setDescription('Close this ModMail ticket and notify the user.')
-    .addStringOption((option) => option.setName('reason').setDescription('Reason shown to the user.').setRequired(false))
+    .addStringOption((option) => option
+      .setName('reason')
+      .setDescription('Reason shown to the user.')
+      .setMaxLength(500)
+      .setRequired(false))
     .setDMPermission(false),
 
   async execute(interaction) {

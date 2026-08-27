@@ -8,7 +8,11 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('note')
     .setDescription('Add an internal note (never sent to the user).')
-    .addStringOption((option) => option.setName('text').setDescription('Note content.').setRequired(true))
+    .addStringOption((option) => option
+      .setName('text')
+      .setDescription('Note content.')
+      .setMaxLength(1800)
+      .setRequired(true))
     .setDMPermission(false),
 
   async execute(interaction) {

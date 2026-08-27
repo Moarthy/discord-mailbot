@@ -4,6 +4,7 @@ const store = require('../store/ticketStore');
 const embeds = require('../utils/embeds');
 const logService = require('../services/logService');
 const { isModerator } = require('../utils/permissions');
+const { truncate } = require('../utils/text');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,7 +14,11 @@ module.exports = {
       .setName('add')
       .setDescription('Block a user from opening tickets.')
       .addUserOption((option) => option.setName('user').setDescription('User to block.').setRequired(true))
-      .addStringOption((option) => option.setName('reason').setDescription('Reason shown to the user.').setRequired(false)))
+      .addStringOption((option) => option
+        .setName('reason')
+        .setDescription('Reason shown to the user.')
+        .setMaxLength(500)
+        .setRequired(false)))
     .addSubcommand((sub) => sub
       .setName('remove')
       .setDescription('Unblock a user.')
@@ -74,9 +79,28 @@ module.exports = {
       return interaction.reply({ embeds: [embeds.systemEmbed('No users are blacklisted.')], flags: MessageFlags.Ephemeral });
     }
 
-    const lines = list.map((entry) => `• <@${entry.userId}> — ${entry.reason}`);
+    // The full list can outgrow a single embed description, so entries are
+    // added until the budget runs out and the remainder is summarised.
+    const header = `**Blacklisted users (${list.length}):**`;
+    const budget = embeds.Limits.description - 64;
+
+    const shown = [];
+    let used = header.length;
+
+    for (const entry of list) {
+      const line = `• <@${entry.userId}> — ${truncate(entry.reason, 100)}`;
+      if (used + line.length + 1 > budget) break;
+      shown.push(line);
+      used += line.length + 1;
+    }
+
+    const remaining = list.length - shown.length;
+    const body = [header, ...shown, remaining > 0 ? `…and ${remaining} more.` : null]
+      .filter(Boolean)
+      .join('\n');
+
     return interaction.reply({
-      embeds: [embeds.systemEmbed(`**Blacklisted users:**\n${lines.join('\n')}`)],
+      embeds: [embeds.systemEmbed(body)],
       flags: MessageFlags.Ephemeral
     });
   }
