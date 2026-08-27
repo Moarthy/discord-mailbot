@@ -88,11 +88,16 @@ module.exports = {
 
       const newAnonymous = !ticket.anonymous;
       store.setAnonymous(ticket.userId, newAnonymous);
-      await ticketService.refreshHeader(interaction.client, ticket);
-      return interaction.reply({
+
+      // Acknowledge before refreshing the header: that call costs several API
+      // round trips and would otherwise expire the 3s interaction token.
+      await interaction.reply({
         embeds: [embeds.systemEmbed(newAnonymous ? '🕶 Anonymous replies are now ON.' : '🕶 Anonymous replies are now OFF.')],
         ...EPHEMERAL
       });
+
+      await ticketService.refreshHeader(interaction.client, ticket);
+      return undefined;
     }
 
     if (action === 'transcript') {

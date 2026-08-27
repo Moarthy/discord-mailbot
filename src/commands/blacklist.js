@@ -45,32 +45,40 @@ module.exports = {
         return interaction.reply({ embeds: [embeds.errorEmbed('The server owner cannot be blacklisted.')], flags: MessageFlags.Ephemeral });
       }
 
+      // The member fetch and log post are both network calls, so claim the
+      // interaction token before either of them runs.
+      await interaction.deferReply();
+
       const targetMember = await interaction.guild.members.fetch(target.id).catch(() => null);
 
       if (targetMember && isModerator(targetMember)) {
-        return interaction.reply({ embeds: [embeds.errorEmbed('Staff members cannot be blacklisted.')], flags: MessageFlags.Ephemeral });
+        return interaction.editReply({ embeds: [embeds.errorEmbed('Staff members cannot be blacklisted.')] });
       }
 
       store.blacklistAdd(target.id, { reason, byId: interaction.user.id });
+
+      await interaction.editReply({ embeds: [embeds.systemEmbed(`⛔ ${target.tag} can no longer contact ModMail.`)] });
 
       await logService.send(
         interaction.client,
         embeds.systemEmbed(`⛔ ${target.tag} was blacklisted by ${interaction.user.tag}. Reason: ${reason}`, embeds.Colors.danger)
       );
 
-      return interaction.reply({ embeds: [embeds.systemEmbed(`⛔ ${target.tag} can no longer contact ModMail.`)] });
+      return undefined;
     }
 
     if (sub === 'remove') {
       const target = interaction.options.getUser('user');
       store.blacklistRemove(target.id);
 
+      await interaction.reply({ embeds: [embeds.systemEmbed(`✅ ${target.tag} can contact ModMail again.`)] });
+
       await logService.send(
         interaction.client,
         embeds.systemEmbed(`✅ ${target.tag} was removed from the blacklist by ${interaction.user.tag}.`, embeds.Colors.success)
       );
 
-      return interaction.reply({ embeds: [embeds.systemEmbed(`✅ ${target.tag} can contact ModMail again.`)] });
+      return undefined;
     }
 
     const list = store.listBlacklist();

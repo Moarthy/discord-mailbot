@@ -31,20 +31,27 @@ module.exports = {
       if (!me) {
         logger.warn('Could not resolve the bot member in the ModMail guild.');
       } else {
+        // Named so the warning is actionable — logging the raw bitfield value
+        // ("16") told nobody which permission to grant.
         const recommended = [
-          PermissionsBitField.Flags.ManageChannels,
-          PermissionsBitField.Flags.ManageWebhooks,
-          PermissionsBitField.Flags.ManageRoles,
-          PermissionsBitField.Flags.ManageMessages,
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.SendMessages,
-          PermissionsBitField.Flags.ReadMessageHistory
+          'ManageChannels',
+          'ManageWebhooks',
+          'ManageRoles',
+          'ManageMessages',
+          'ViewChannel',
+          'SendMessages',
+          'ReadMessageHistory'
         ];
 
-        for (const permission of recommended) {
-          if (!me.permissions.has(permission)) {
-            logger.warn(`Bot may be missing a recommended permission: ${permission}`);
-          }
+        const missing = recommended.filter(
+          (name) => !me.permissions.has(PermissionsBitField.Flags[name])
+        );
+
+        if (missing.length) {
+          logger.warn(
+            `Bot is missing recommended permission(s): ${missing.join(', ')}. ` +
+            'Ticket creation, webhook relaying or cleanup may fail.'
+          );
         }
       }
 

@@ -34,7 +34,10 @@ module.exports = {
 
     store.addLog(ticket.userId, { type: 'note', authorName, content: text });
 
-    await interaction.channel.send({ embeds: [embeds.noteEmbed(authorName, text, ticket)] });
-    return interaction.reply({ embeds: [embeds.systemEmbed('📝 Note added.')], flags: MessageFlags.Ephemeral });
+    // Acknowledge before posting the note embed; the channel send is a network
+    // call that can outlive the 3s interaction token on slow connections.
+    await interaction.reply({ embeds: [embeds.systemEmbed('📝 Note added.')], flags: MessageFlags.Ephemeral });
+    await interaction.channel.send({ embeds: [embeds.noteEmbed(authorName, text, ticket)] }).catch(() => {});
+    return undefined;
   }
 };
