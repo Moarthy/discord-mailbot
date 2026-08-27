@@ -24,6 +24,17 @@ module.exports = {
         await modals.execute(interaction);
       }
     } catch (error) {
+      // 10062 means the interaction token expired (handler took over 3s) and
+      // 40060 means it was already acknowledged. Neither can be answered, so
+      // log them compactly instead of dumping a stack trace for a dead token.
+      if (error?.code === 10062 || error?.code === 40060) {
+        logger.warn(
+          `Interaction expired before it could be answered (code ${error.code}): ` +
+          `${interaction.isChatInputCommand() ? `/${interaction.commandName}` : interaction.customId ?? 'unknown'}.`
+        );
+        return;
+      }
+
       logger.error('Interaction failed.', error);
 
       const payload = {

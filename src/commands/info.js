@@ -21,6 +21,9 @@ module.exports = {
       return interaction.reply({ embeds: [embeds.errorEmbed('This channel is not a ticket.')], flags: MessageFlags.Ephemeral });
     }
 
+    // users.fetch() may hit the network, so reserve the token up front.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
     const user = await interaction.client.users.fetch(ticket.userId).catch(() => null);
     const count = (type) => ticket.log.filter((entry) => entry.type === type).length;
 
@@ -38,6 +41,6 @@ module.exports = {
       )
       .setTimestamp();
 
-    return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    return interaction.editReply({ embeds: [embed] });
   }
 };

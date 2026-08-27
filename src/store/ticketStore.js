@@ -29,6 +29,7 @@ const SCHEMA = `
     anonymous         INTEGER NOT NULL DEFAULT 0,
     header_message_id TEXT,
     created_at        TEXT NOT NULL,
+    closed_at         TEXT,
     log               TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS archive (
@@ -55,6 +56,7 @@ function rowToTicket(row) {
     anonymous: Boolean(row.anonymous),
     headerMessageId: row.header_message_id,
     createdAt: row.created_at,
+    closedAt: row.closed_at ?? null,
     log: []
   };
   try {
@@ -79,11 +81,12 @@ class TicketStore {
     this.db.exec('PRAGMA journal_mode = WAL;');
     this.db.exec('PRAGMA synchronous = NORMAL;');
     this.db.exec(SCHEMA);
+    this.applyMigrations();
 
     this.stmtUpsertTicket = this.db.prepare(`
       INSERT INTO tickets
-        (user_id, channel_id, webhook_id, webhook_token, guild_id, number, claimed_by, anonymous, header_message_id, created_at, log)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, channel_id, webhook_id, webhook_token, guild_id, number, claimed_by, anonymous, header_message_id, created_at, closed_at, log)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(user_id) DO UPDATE SET
         channel_id = excluded.channel_id,
         webhook_id = excluded.webhook_id,
@@ -94,6 +97,7 @@ class TicketStore {
         anonymous = excluded.anonymous,
         header_message_id = excluded.header_message_id,
         created_at = excluded.created_at,
+        closed_at = excluded.closed_at,
         log = excluded.log
     `);
     this.stmtDeleteTicket = this.db.prepare('DELETE FROM tickets WHERE user_id = ?');
@@ -119,6 +123,19 @@ class TicketStore {
     logger.info(
       `Store ready (${this.dbPath}): ${this.tickets.size} open, ${this.countArchive()} archived, ${this.blacklist.size} blacklisted.`
     );
+  }
+
+  // CREATE TABLE IF NOT EXISTS is a no-op on databases created by older
+  // versions, so columns added later must be patched in explicitly.
+  applyMigrations() {
+    const columns = new Set(
+      this.db.prepare('PRAGMA table_info(tickets)').all().map((column) => column.name)
+    );
+
+    if (!columns.has('closed_at')) {
+      this.db.exec('ALTER TABLE tickets ADD COLUMN closed_at TEXT');
+      logger.info('Migrated tickets table: added closed_at column.');
+    }
   }
 
   loadFromDb() {
@@ -178,6 +195,7 @@ class TicketStore {
           raw.anonymous ? 1 : 0,
           raw.headerMessageId ?? null,
           raw.createdAt ?? new Date().toISOString(),
+          raw.closedAt ?? null,
           JSON.stringify(Array.isArray(raw.log) ? raw.log : [])
         );
       }
@@ -223,6 +241,7 @@ class TicketStore {
       record.anonymous ? 1 : 0,
       record.headerMessageId ?? null,
       record.createdAt,
+      record.closedAt ?? null,
       JSON.stringify(record.log)
     );
   }
@@ -258,6 +277,7 @@ class TicketStore {
       anonymous: false,
       headerMessageId: null,
       createdAt: now,
+      closedAt: null,
       log: [{ t: now, type: 'system', authorName: 'System', content: 'Ticket opened via DM.' }]
     };
 

@@ -31,17 +31,10 @@ module.exports = {
 
       store.setFeedback(number, text);
 
-      await logService.send(
-        interaction.client,
-        embeds.systemEmbed(
-          `New feedback on ticket ${embeds.ticketNumberLabel(number)}:\n> ${text.slice(0, 500)}`,
-          embeds.Colors.feedback
-        )
-      );
-
       // Keep the close summary above the thanks line instead of overwriting
-      // the whole message with it.
-      return interaction.update({
+      // the whole message with it. Answering before the log post keeps the
+      // response inside the 3s interaction window.
+      await interaction.update({
         embeds: [
           embeds.closeEmbed({
             ticket: record,
@@ -52,6 +45,16 @@ module.exports = {
         ],
         components: []
       });
+
+      await logService.send(
+        interaction.client,
+        embeds.systemEmbed(
+          `New feedback on ticket ${embeds.ticketNumberLabel(number)}:\n> ${text.slice(0, 500)}`,
+          embeds.Colors.feedback
+        )
+      );
+
+      return undefined;
     }
 
     return interaction.reply({
