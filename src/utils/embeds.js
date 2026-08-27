@@ -1,6 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
-const { formatRelative, durationHuman } = require('./time');
+const { formatRelative, formatFooterDate, toDate, durationHuman } = require('./time');
 const { truncate } = require('./text');
 
 // Discord's hard embed limits. Exceeding any of them makes EmbedBuilder throw
@@ -44,10 +44,15 @@ function headerEmbed(ticket, user, member) {
       { name: 'User ID', value: `\`${user.id}\``, inline: true },
       { name: 'Account created', value: formatRelative(user.createdAt), inline: true },
       { name: 'Server member', value: member?.joinedAt ? formatRelative(member.joinedAt) : 'No', inline: true },
+      { name: 'Opened', value: formatRelative(ticket.createdAt), inline: true },
       { name: 'Status', value: statusText(ticket) }
     )
-    .setFooter({ text: `Ticket ${ticketNumberLabel(ticket.number)} · opened ${formatRelative(ticket.createdAt)}` })
-    .setTimestamp();
+    // Footers cannot render <t:...> markdown, so the relative "opened" time
+    // lives in a field above and the footer carries only the ticket label.
+    .setFooter({ text: `Ticket ${ticketNumberLabel(ticket.number)} · opened ${formatFooterDate(ticket.createdAt)}` })
+    // Pinned to the open time: the header is re-rendered on every claim and
+    // anon toggle, so a bare setTimestamp() drifted to "now" each time.
+    .setTimestamp(toDate(ticket.createdAt));
 }
 
 function headerButtons(ticket) {
